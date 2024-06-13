@@ -100,6 +100,9 @@ function App() {
         reader.readAsArrayBuffer(file);
       });
       setFiles([]);
+      // Clear the input
+      const fileInput = document.querySelector("input[type='file']");
+      fileInput.value = "";
     }
   };
 
@@ -107,19 +110,56 @@ function App() {
     setFiles(Array.from(e.target.files));
   };
 
+  const draw = (data) => {
+      const text = data;
+      // Parse PPM file from text variable
+      const lines = text.split("\n");
+      const width = parseInt(lines[1].split(" ")[0]);
+      const height = parseInt(lines[1].split(" ")[1]);
+
+      // set canvas size
+      const canvas = document.getElementById("canvas");
+      // canvas.width = width;
+      // canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      const imageData = ctx.createImageData(width, height);
+
+      for (let i = 3; i < lines.length; i++) {
+        const r = parseInt(lines[i].split(" ")[0]);
+        const g = parseInt(lines[i].split(" ")[1]);
+        const b = parseInt(lines[i].split(" ")[2]);
+
+        const index = (i - 3) * 4;
+        imageData.data[index] = r;
+        imageData.data[index + 1] = g;
+        imageData.data[index + 2] = b;
+        imageData.data[index + 3] = 255;
+
+        if ((i - 3) % width === 0) {
+          ctx.putImageData(imageData, 0, 0);
+        }
+      }
+    };
+
   return (
     <div className="App">
       <h1>WebSocket Client</h1>
-      <div className="messages">
-        {messages.map((message, index) => (
-          <div key={index}>{message}</div>
-        ))}
-      </div>
+      <canvas id="canvas" style={{
+        border: "1px solid black",
+        width: 800,
+      }}></canvas>
+      <div style={{
+        position: "fixed",
+        bottom: 20,
+        width: "100%",
+        left: "50%",
+        transform: "translateX(-50%)",
+      }}>
       <input
         type="text"
         value={type}
         onChange={(e) => setType(e.target.value)}
-        placeholder="Enter type of the message"
+        placeholder="Type of the message"
       />
       <input
         type="text"
@@ -132,9 +172,26 @@ function App() {
         type="file"
         multiple
         onChange={handleFileChange}
-        style={{ display: "block", margin: "20px 0" }}
+        style={{ display: "block", margin: "auto", marginTop: 20 }}
       />
       <button onClick={sendFiles}>Send Files</button>
+      <button onClick={() => {
+        ws.current.send(
+          JSON.stringify({
+            type: "DISPATCH_JOB",
+            id,
+          })
+        );
+      }}>Start job</button>
+      <button onClick={() => {
+        ws.current.send(
+          JSON.stringify({
+            type: "KILL_JOB",
+            id,
+          })
+        );
+      }}>Kill job</button>
+    </div>
     </div>
   );
 }
