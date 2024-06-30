@@ -14,6 +14,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "deploy": "cp -R build/* ../public/ && echo 'Deployed to server'",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
