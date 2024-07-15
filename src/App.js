@@ -12,7 +12,7 @@ function App() {
 
   useEffect(() => {
     // Connect to WebSocket server
-    ws.current = new WebSocket("ws://localhost:8080");
+    ws.current = new WebSocket("ws://localhost:22636");
 
     ws.current.onopen = () => {
       console.log("Connected to server");
@@ -21,17 +21,10 @@ function App() {
       const id = urlParams.get("id");
       if (id) {
         setId(id);
-        ws.current.send(
-          JSON.stringify({
-            type: "INIT_CLIENT",
-            id,
-          })
-        );
+        ws.current.send("INIT_CLIENT#" + id); 
       } else {
         ws.current.send(
-          JSON.stringify({
-            type: "INIT_JOB",
-          })
+          "INIT_JOB#"
         );
       }
     };
@@ -71,11 +64,7 @@ function App() {
   const sendMessage = () => {
     if (ws.current && input.trim()) {
       ws.current.send(
-        JSON.stringify({
-          type,
-          message: input,
-          id,
-        })
+        type + "#" + id + "#" + input
       );
       setInput("");
       setType("");
@@ -89,12 +78,7 @@ function App() {
         reader.onload = () => {
           const arrayBuffer = reader.result;
           ws.current.send(
-            JSON.stringify({
-              type: "FILE",
-              id,
-              name: file.name,
-              file: Array.from(new Uint8Array(arrayBuffer)),
-            })
+            "FILE#" + id + "#" + file.name + "#" + Array.from(new Uint8Array(arrayBuffer))
           );
         };
         reader.readAsArrayBuffer(file);
@@ -177,18 +161,12 @@ function App() {
       <button onClick={sendFiles}>Send Files</button>
       <button onClick={() => {
         ws.current.send(
-          JSON.stringify({
-            type: "DISPATCH_JOB",
-            id,
-          })
+          "DISPATCH_JOB#" + id
         );
       }}>Start job</button>
       <button onClick={() => {
         ws.current.send(
-          JSON.stringify({
-            type: "KILL_JOB",
-            id,
-          })
+          "KILL_JOB#" + id
         );
       }}>Kill job</button>
     </div>
