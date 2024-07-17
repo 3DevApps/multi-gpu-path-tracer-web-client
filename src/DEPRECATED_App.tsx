@@ -1,6 +1,5 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from "react";
-import "./App.css";
 
 const SERVER_LOCATION = "ws://localhost:22636";
 
@@ -23,11 +22,9 @@ function App() {
       const id = urlParams.get("id");
       if (id) {
         setId(id);
-        ws.current.send("INIT_CLIENT#" + id); 
+        ws.current.send("INIT_CLIENT#" + id);
       } else {
-        ws.current.send(
-          "INIT_JOB#"
-        );
+        ws.current.send("INIT_JOB#");
       }
     };
 
@@ -65,9 +62,7 @@ function App() {
 
   const sendMessage = () => {
     if (ws.current && input.trim()) {
-      ws.current.send(
-        type + "#" + id + "#" + input
-      );
+      ws.current.send(type + "#" + id + "#" + input);
       setInput("");
       setType("");
     }
@@ -80,7 +75,12 @@ function App() {
         reader.onload = () => {
           const arrayBuffer = reader.result;
           ws.current.send(
-            "FILE#" + id + "#" + file.name + "#" + Array.from(new Uint8Array(arrayBuffer))
+            "FILE#" +
+              id +
+              "#" +
+              file.name +
+              "#" +
+              Array.from(new Uint8Array(arrayBuffer))
           );
         };
         reader.readAsArrayBuffer(file);
@@ -97,81 +97,90 @@ function App() {
   };
 
   const draw = (data) => {
-      const text = data;
-      // Parse PPM file from text variable
-      const lines = text.split("\n");
-      const width = parseInt(lines[1].split(" ")[0]);
-      const height = parseInt(lines[1].split(" ")[1]);
+    const text = data;
+    // Parse PPM file from text variable
+    const lines = text.split("\n");
+    const width = parseInt(lines[1].split(" ")[0]);
+    const height = parseInt(lines[1].split(" ")[1]);
 
-      // set canvas size
-      const canvas = document.getElementById("canvas");
-      // canvas.width = width;
-      // canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      const imageData = ctx.createImageData(width, height);
+    // set canvas size
+    const canvas = document.getElementById("canvas");
+    // canvas.width = width;
+    // canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    const imageData = ctx.createImageData(width, height);
 
-      for (let i = 3; i < lines.length; i++) {
-        const r = parseInt(lines[i].split(" ")[0]);
-        const g = parseInt(lines[i].split(" ")[1]);
-        const b = parseInt(lines[i].split(" ")[2]);
+    for (let i = 3; i < lines.length; i++) {
+      const r = parseInt(lines[i].split(" ")[0]);
+      const g = parseInt(lines[i].split(" ")[1]);
+      const b = parseInt(lines[i].split(" ")[2]);
 
-        const index = (i - 3) * 4;
-        imageData.data[index] = r;
-        imageData.data[index + 1] = g;
-        imageData.data[index + 2] = b;
-        imageData.data[index + 3] = 255;
+      const index = (i - 3) * 4;
+      imageData.data[index] = r;
+      imageData.data[index + 1] = g;
+      imageData.data[index + 2] = b;
+      imageData.data[index + 3] = 255;
 
-        if ((i - 3) % width === 0) {
-          ctx.putImageData(imageData, 0, 0);
-        }
+      if ((i - 3) % width === 0) {
+        ctx.putImageData(imageData, 0, 0);
       }
-    };
+    }
+  };
 
   return (
     <div className="App">
       <h1>WebSocket Client</h1>
-      <canvas id="canvas" style={{
-        border: "1px solid black",
-        width: 800,
-      }}></canvas>
-      <div style={{
-        position: "fixed",
-        bottom: 20,
-        width: "100%",
-        left: "50%",
-        transform: "translateX(-50%)",
-      }}>
-      <input
-        type="text"
-        value={type}
-        onChange={(e) => setType(e.target.value)}
-        placeholder="Type of the message"
-      />
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter message"
-      />
-      <button onClick={sendMessage}>Send Message</button>
-      <input
-        type="file"
-        multiple
-        onChange={handleFileChange}
-        style={{ display: "block", margin: "auto", marginTop: 20 }}
-      />
-      <button onClick={sendFiles}>Send Files</button>
-      <button onClick={() => {
-        ws.current.send(
-          "DISPATCH_JOB#" + id
-        );
-      }}>Start job</button>
-      <button onClick={() => {
-        ws.current.send(
-          "KILL_JOB#" + id
-        );
-      }}>Kill job</button>
-    </div>
+      <canvas
+        id="canvas"
+        style={{
+          border: "1px solid black",
+          width: 800,
+        }}
+      ></canvas>
+      <div
+        style={{
+          position: "fixed",
+          bottom: 20,
+          width: "100%",
+          left: "50%",
+          transform: "translateX(-50%)",
+        }}
+      >
+        <input
+          type="text"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          placeholder="Type of the message"
+        />
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Enter message"
+        />
+        <button onClick={sendMessage}>Send Message</button>
+        <input
+          type="file"
+          multiple
+          onChange={handleFileChange}
+          style={{ display: "block", margin: "auto", marginTop: 20 }}
+        />
+        <button onClick={sendFiles}>Send Files</button>
+        <button
+          onClick={() => {
+            ws.current.send("DISPATCH_JOB#" + id);
+          }}
+        >
+          Start job
+        </button>
+        <button
+          onClick={() => {
+            ws.current.send("KILL_JOB#" + id);
+          }}
+        >
+          Kill job
+        </button>
+      </div>
     </div>
   );
 }

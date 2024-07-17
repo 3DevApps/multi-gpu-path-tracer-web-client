@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Multi-GPU Path Tracer",
+  "name": "Platform for investigating scheduling algorithms and resource utilization for Path Tracing in multi-GPU environments",
   "icons": [
     {
       "src": "favicon.ico",
