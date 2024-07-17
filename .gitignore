@@ -9,7 +9,8 @@
 /coverage
 
 # production
-/build
+# TODO: uncomment the next line - pushing build files because of the way the project is set up
+# /build
 
 # misc
 .DS_Store
