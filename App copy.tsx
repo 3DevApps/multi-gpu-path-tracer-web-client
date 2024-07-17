@@ -1,6 +1,8 @@
-// src/App.js
+// @ts-nocheck
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
+
+const SERVER_LOCATION = "ws://localhost:22636";
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -12,7 +14,7 @@ function App() {
 
   useEffect(() => {
     // Connect to WebSocket server
-    ws.current = new WebSocket("ws://localhost:22636");
+    ws.current = new WebSocket(SERVER_LOCATION);
 
     ws.current.onopen = () => {
       console.log("Connected to server");
