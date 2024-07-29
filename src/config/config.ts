@@ -8,4 +8,5 @@ export default {
     { value: "SJN", label: "Shortest-Job-Next" },
     { value: "PS", label: "Priority Scheduling" },
   ],
+  WS_SERVER_URL: "ws://localhost:8080",
 };

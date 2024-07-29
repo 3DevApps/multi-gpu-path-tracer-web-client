@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import "./RenderStream.css";
+import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
 
 export default function RenderStream() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { sendMessage } = useWebSocketConnection();
 
   useEffect(() => {
     const canvas = canvasRef.current;

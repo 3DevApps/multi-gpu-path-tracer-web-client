@@ -4,8 +4,11 @@ import Header from "./components/Header";
 import PathTracerSettings from "./components/PathTracerSettings";
 import RenderStream from "./components/RenderStream";
 import RenderStatistics from "./components/RenderStatistics";
+import { useHandleWebSocketMessages } from "./hooks/useHandleWebSocketMessages";
 
 function App() {
+  useHandleWebSocketMessages();
+
   return (
     <main>
       <Header />
