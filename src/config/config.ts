@@ -1,4 +1,6 @@
-export default {
+const config = {
+  WS_SERVER_URL: "",
+  HTTP_SERVER_URL: "",
   DEFAULT_IMAGE_RESOLUTION: {
     WIDTH: 1920,
     HEIGHT: 1080,
@@ -8,5 +10,10 @@ export default {
     { value: "SJN", label: "Shortest-Job-Next" },
     { value: "PS", label: "Priority Scheduling" },
   ],
-  WS_SERVER_URL: "ws://localhost:8080",
+  SERVER_URL: "localhost:8080",
 };
+
+config.WS_SERVER_URL = `ws://${config.SERVER_URL}`;
+config.HTTP_SERVER_URL = `http://${config.SERVER_URL}`;
+
+export default config;

@@ -2,8 +2,8 @@ import React, { useCallback, useMemo, useState } from "react";
 import "./PathTracerSettings.css";
 import {
   Button,
-  Flex,
   InputNumber,
+  message,
   Select,
   Space,
   Upload,
@@ -16,28 +16,11 @@ import {
 } from "@ant-design/icons";
 import ImageResolutionSetter from "./ImageResolutionInput";
 import config from "../config/config";
-
-const props: UploadProps = {
-  name: "file",
-  action: "https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload",
-  multiple: true,
-  accept: ".obj,.mtl",
-  headers: {
-    authorization: "authorization-text",
-  },
-  onChange(info) {
-    if (info.file.status !== "uploading") {
-      console.log(info.file, info.fileList);
-    }
-    if (info.file.status === "done") {
-      // message.success(`${info.file.name} file uploaded successfully`);
-    } else if (info.file.status === "error") {
-      // message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-};
+import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
+import { encodeMessage } from "../utils/webSocketMessageFormat";
 
 export default function PathTracerSettings() {
+  const { sendMessage } = useWebSocketConnection();
   const [asideStyle, setAsideStyle] = useState({ left: 0 });
   const closeButtonStyle = useMemo(
     () => ({
@@ -54,6 +37,39 @@ export default function PathTracerSettings() {
   }, []);
 
   const [sceneBeingLoaded, setSceneBeingLoaded] = useState(false);
+
+  // TODO: move this to a context
+  const jobId = useMemo(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("jobId");
+  }, []);
+
+  const uploadProps: UploadProps = useMemo(
+    () => ({
+      name: "file",
+      action: `${config.HTTP_SERVER_URL}/upload?jobId=${jobId}`,
+      multiple: true,
+      accept: ".obj,.mtl",
+      onChange(info) {
+        if (info.file.status === "done") {
+          message.success(`${info.file.name} file uploaded successfully!`);
+          setSceneBeingLoaded(false);
+
+          // Notify the path tracing job about the new scene
+          sendMessage(encodeMessage(["NEW_FILE_UPLOADED"]));
+        } else if (info.file.status === "error") {
+          message.error(`${info.file.name} file upload failed!`);
+          setSceneBeingLoaded(false);
+        }
+      },
+      beforeUpload: () => {
+        setSceneBeingLoaded(true);
+        return true;
+      },
+      showUploadList: false,
+    }),
+    [jobId]
+  );
 
   return (
     <aside className="path-tracer-settings" style={asideStyle}>
@@ -73,7 +89,7 @@ export default function PathTracerSettings() {
             <Button type="primary">&gt;</Button>
           </Space.Compact>
           <ImageResolutionSetter />
-          <Upload {...props}>
+          <Upload {...uploadProps}>
             <Button loading={sceneBeingLoaded} icon={<SettingOutlined />}>
               Load scene
             </Button>

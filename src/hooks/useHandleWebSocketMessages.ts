@@ -1,14 +1,6 @@
 import { useEffect } from "react";
 import { useWebSocketConnection } from "./useWebSocketConnection";
-
-const parseMessage = (message: string) => {
-  try {
-    return message.split("#");
-  } catch (error) {
-    console.error("Failed to parse message:", message);
-    return null;
-  }
-};
+import { parseMessage } from "../utils/webSocketMessageFormat";
 
 export function useHandleWebSocketMessages() {
   const { lastMessage, sendMessage } = useWebSocketConnection();
