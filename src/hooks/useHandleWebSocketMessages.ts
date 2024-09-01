@@ -6,7 +6,7 @@ export function useHandleWebSocketMessages() {
   const { lastMessage, sendMessage } = useWebSocketConnection();
 
   useEffect(() => {
-    if (!lastMessage) {
+    if (!lastMessage || lastMessage.data instanceof Blob) {
       return;
     }
     const message = parseMessage(lastMessage.data);
