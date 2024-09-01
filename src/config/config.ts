@@ -1,3 +1,6 @@
+const wsProtocol = process.env.REACT_APP_ENVIRONMENT === 'development' ? "ws" : "wss";
+const httpProtocol = process.env.REACT_APP_ENVIRONMENT === 'development' ? "http" : "https";
+
 const config = {
   WS_SERVER_URL: "",
   HTTP_SERVER_URL: "",
@@ -10,10 +13,10 @@ const config = {
     { value: "SJN", label: "Shortest-Job-Next" },
     { value: "PS", label: "Priority Scheduling" },
   ],
-  SERVER_URL: "localhost:8080",
+  SERVER_URL: process.env.REACT_APP_ENVIRONMENT === 'development' ? "localhost:8080" : "pathtracing-relay-server.klatka.it"
 };
 
-config.WS_SERVER_URL = `ws://${config.SERVER_URL}`;
-config.HTTP_SERVER_URL = `http://${config.SERVER_URL}`;
+config.WS_SERVER_URL = `${wsProtocol}://${config.SERVER_URL}`;
+config.HTTP_SERVER_URL = `${httpProtocol}://${config.SERVER_URL}`;
 
 export default config;

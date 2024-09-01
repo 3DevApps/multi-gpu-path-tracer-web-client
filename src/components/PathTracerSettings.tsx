@@ -42,7 +42,7 @@ export default function PathTracerSettings() {
   const jobId = useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get("jobId");
-  }, []);
+  }, [window.location.search]);
 
   const uploadProps: UploadProps = useMemo(
     () => ({

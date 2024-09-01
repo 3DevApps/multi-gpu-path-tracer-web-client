@@ -1,14 +1,25 @@
 import React, { useEffect, useRef } from "react";
 import "./RenderStream.css";
 import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
+import { parseMessage } from "../utils/webSocketMessageFormat";
 
 export default function RenderStream() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { sendMessage } = useWebSocketConnection();
+  const { lastMessage } = useWebSocketConnection();
+  const [renderData, setRenderData] = React.useState<any>(null);
+
+  useEffect(() => {
+    if (lastMessage !== null) {
+      const parsedMessage = parseMessage(lastMessage.data);
+      if (parsedMessage && parsedMessage[0] === "RENDER" && parsedMessage[1]) {
+        setRenderData(parsedMessage[1]);
+      }
+    }
+  }, [lastMessage]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) {
+    if (!canvas || !renderData) {
       return;
     }
     const ctx = canvas.getContext("2d");
@@ -16,18 +27,27 @@ export default function RenderStream() {
       return;
     }
 
-    const imageData = ctx.createImageData(605, 349);
+    // TODO: get proper image resolution from somewhere
+    const width = 1600;
+    const height = 900;
 
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      imageData.data[i + 0] = 60; // R value
-      imageData.data[i + 1] = 15; // G value
-      imageData.data[i + 2] = 255; // B value
-      imageData.data[i + 3] = 255; // A value
+    canvas.width = width;
+    canvas.height = height;
+    const imageData = ctx.createImageData(width, height);
+    const data = renderData.split(",");
+
+    let dataIndex = 0;
+    for (let i = 0; i < width * height; i++) {
+        const baseIdx = i * 4;
+        imageData.data[baseIdx] = data[dataIndex++];
+        imageData.data[baseIdx + 1] = data[dataIndex++];
+        imageData.data[baseIdx + 2] = data[dataIndex++];
+        imageData.data[baseIdx + 3] = 255; // Fully opaque
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.putImageData(imageData, 0, 0);
-  }, []);
+  }, [renderData]);
 
   return (
     <section>
