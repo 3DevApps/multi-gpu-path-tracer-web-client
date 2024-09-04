@@ -49,7 +49,7 @@ export default function RenderStatisticsComponent({renderStatistics}: RenderStat
     <aside className="render-statistics" style={asideStyle}>
       <div className="scrollable-content">
         <h2 className="header">Render statistics</h2>
-        {resolvedRenderStatistics}
+        {resolvedRenderStatistics ? resolvedRenderStatistics : <p>No statistics available</p>}
         <div className="toggle-button close-button" onClick={toggleAside}>
           <LeftOutlined
             className="close-button-icon"
