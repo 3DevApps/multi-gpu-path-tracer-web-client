@@ -7,7 +7,7 @@ import RenderStatistics from "./components/RenderStatistics";
 import { useHandleWebSocketMessages } from "./hooks/useHandleWebSocketMessages";
 
 function App() {
-  useHandleWebSocketMessages();
+  const {renderStatistics} = useHandleWebSocketMessages();
 
   return (
     <main>
@@ -15,7 +15,7 @@ function App() {
       <div className="main-view-wrapper">
         <PathTracerSettings />
         <RenderStream />
-        <RenderStatistics />
+        <RenderStatistics renderStatistics={renderStatistics} />
       </div>
     </main>
   );
