@@ -34,6 +34,11 @@ export default function Header() {
           environment.
         </p>
         <br />
+        <p>
+          TODO: Add more information about the project, how to use this,
+          instruction how to modify FOV, move around the scene, etc.
+        </p>
+        <br />
         <p>Authors: Patryk Klatka, Wojciech Łoboda, Bartłomiej Tempka</p>
       </Modal>
     </div>

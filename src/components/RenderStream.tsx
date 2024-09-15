@@ -16,7 +16,7 @@ export default function RenderStream() {
         return;
       }
       sendMessage(
-        encodeMessage(["CLIENT_MESSAGE", "MOUSE_MOVE", clientX, clientY])
+        encodeMessage(["MOUSE_MOVE", clientX, clientY])
       );
     },
     [isMouseDown, sendMessage]

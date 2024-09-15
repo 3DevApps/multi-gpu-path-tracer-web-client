@@ -8,5 +8,5 @@ export const parseMessage = (message: string) => {
 };
 
 export const encodeMessage = (message: string[]) => {
-  return message.join("#");
+  return `CLIENT_MESSAGE#${message.join("#")}`;
 };
