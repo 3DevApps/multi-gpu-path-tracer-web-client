@@ -121,13 +121,14 @@ export default function PathTracerSettings() {
       action: `${config.HTTP_SERVER_URL}/upload?jobId=${jobId}`,
       multiple: true,
       accept: ".obj,.mtl",
+      maxCount: 2,
       onChange(info) {
         if (info.file.status === "done") {
           message.success(`${info.file.name} file uploaded successfully!`);
           setSceneBeingLoaded(false);
 
           // Notify the path tracing job about the new scene
-          sendMessage(["NEW_FILE_UPLOADED"]);
+          sendMessage(["RENDERER_PARAMETER", "NEW_FILE_UPLOADED"]);
         } else if (info.file.status === "error") {
           message.error(`${info.file.name} file upload failed!`);
           setSceneBeingLoaded(false);
@@ -196,6 +197,9 @@ export default function PathTracerSettings() {
               <Select
                 placeholder="Select a scheduling algorithm"
                 options={config.SCHEDULING_ALGORITHMS}
+                onChange={(value) =>
+                  updateRendererParameter("SCHEDULING_ALGORITHM", value)
+                }
               />
             </Form.Item>
             <Flex align="space-between" justify="space-between">

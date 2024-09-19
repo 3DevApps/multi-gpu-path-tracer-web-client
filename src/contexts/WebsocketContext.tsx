@@ -32,8 +32,10 @@ export const WebsocketContextProvider = ({ children }: any) => {
 
   useEffect(() => {
     socket.current = new WebSocket(webSocketUrl);
-    socket.current.onopen = () => console.log("WebSocket opened");
-    socket.current.onclose = () => console.log("WebSocket closed");
+    socket.current.onopen = () =>
+      console.log("WebSocket connection has been opened!");
+    socket.current.onclose = () =>
+      console.log("WebSocket connection has been closed!");
     socket.current.onmessage = (event) => {
       const rawData = event.data;
       // If the data is a Blob, it must be an image to render
