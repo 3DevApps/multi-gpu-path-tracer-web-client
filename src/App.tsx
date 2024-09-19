@@ -5,9 +5,11 @@ import PathTracerSettings from "./components/PathTracerSettings";
 import RenderStream from "./components/RenderStream";
 import RenderStatistics from "./components/RenderStatistics";
 import { useHandleWebSocketMessages } from "./hooks/useHandleWebSocketMessages";
+import { WebsocketContextProvider } from "./contexts/WebsocketContext";
+import { JobSettingsContextProvider } from "./contexts/JobSettingsContext";
 
 function App() {
-  const {renderStatistics} = useHandleWebSocketMessages();
+  const { renderStatistics } = useHandleWebSocketMessages();
 
   return (
     <main>
@@ -21,4 +23,12 @@ function App() {
   );
 }
 
-export default App;
+export default function AppWrapper() {
+  return (
+    <WebsocketContextProvider>
+      <JobSettingsContextProvider>
+        <App />
+      </JobSettingsContextProvider>
+    </WebsocketContextProvider>
+  );
+}

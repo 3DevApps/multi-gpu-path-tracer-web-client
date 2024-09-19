@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import "./PathTracerSettings.css";
 import {
   Button,
@@ -20,7 +26,7 @@ import {
 import ImageResolutionInput from "./ImageResolutionInput";
 import config from "../config/config";
 import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
-import { encodeMessage } from "../utils/webSocketMessageFormat";
+import { JobSettingsContext } from "../contexts/JobSettingsContext";
 
 const BUTTON_RED = "#ff0021";
 
@@ -91,6 +97,7 @@ function NumberInput({
 
 export default function PathTracerSettings() {
   const { sendMessage } = useWebSocketConnection();
+  const { jobId } = useContext(JobSettingsContext);
   const [asideStyle, setAsideStyle] = useState({ left: 0 });
   const closeButtonStyle = useMemo(
     () => ({
@@ -108,12 +115,6 @@ export default function PathTracerSettings() {
 
   const [sceneBeingLoaded, setSceneBeingLoaded] = useState(false);
 
-  // TODO: move this to a context
-  const jobId = useMemo(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("jobId");
-  }, [window.location.search]);
-
   const uploadProps: UploadProps = useMemo(
     () => ({
       name: "file",
@@ -126,7 +127,7 @@ export default function PathTracerSettings() {
           setSceneBeingLoaded(false);
 
           // Notify the path tracing job about the new scene
-          sendMessage(encodeMessage(["NEW_FILE_UPLOADED"]));
+          sendMessage(["NEW_FILE_UPLOADED"]);
         } else if (info.file.status === "error") {
           message.error(`${info.file.name} file upload failed!`);
           setSceneBeingLoaded(false);
@@ -143,7 +144,7 @@ export default function PathTracerSettings() {
 
   const updateRendererParameter = useCallback(
     (parameterKey: string, value: string) => {
-      sendMessage(encodeMessage(["RENDERER_PARAMETER", parameterKey, value]));
+      sendMessage(["RENDERER_PARAMETER", parameterKey, value]);
     },
     [sendMessage]
   );

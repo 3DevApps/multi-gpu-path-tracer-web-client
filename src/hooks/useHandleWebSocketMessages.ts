@@ -1,17 +1,14 @@
-import { useEffect, useState } from "react";
-import { useWebSocketConnection } from "./useWebSocketConnection";
-import { parseMessage } from "../utils/webSocketMessageFormat";
+import { useContext, useEffect, useState } from "react";
 import { RenderStatistics } from "../components/RenderStatistics";
+import { WebsocketContext } from "../contexts/WebsocketContext";
 
 export function useHandleWebSocketMessages() {
-  const { lastMessage, sendMessage } = useWebSocketConnection();
-  const [renderStatistics, setRenderStatistics] = useState<RenderStatistics>([]);
+  const { message, sendMessage } = useContext(WebsocketContext);
+  const [renderStatistics, setRenderStatistics] = useState<RenderStatistics>(
+    []
+  );
 
   useEffect(() => {
-    if (!lastMessage || lastMessage.data instanceof Blob) {
-      return;
-    }
-    const message = parseMessage(lastMessage.data);
     if (!message) {
       return;
     }
@@ -29,7 +26,7 @@ export function useHandleWebSocketMessages() {
       default:
         break;
     }
-  }, [lastMessage, sendMessage]);
+  }, [message, sendMessage]);
 
   return { renderStatistics };
 }
