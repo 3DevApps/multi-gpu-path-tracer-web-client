@@ -197,6 +197,7 @@ export default function PathTracerSettings() {
               <Select
                 placeholder="Select a scheduling algorithm"
                 options={config.SCHEDULING_ALGORITHMS}
+                defaultValue={config.DEFAULT_SCHEDULING_ALGORITHM}
                 onChange={(value) =>
                   updateRendererParameter("SCHEDULING_ALGORITHM", value)
                 }
@@ -261,7 +262,7 @@ export default function PathTracerSettings() {
                   onClick={() => {
                     updateRendererParameter(
                       "THREAD_BLOCK_SIZE",
-                      `${threadBlockSizeX}x${threadBlockSizeY}`
+                      `${threadBlockSizeX}#${threadBlockSizeY}`
                     );
                     setPrevThreadBlockSizeX(threadBlockSizeX);
                     setPrevThreadBlockSizeY(threadBlockSizeY);
@@ -283,7 +284,7 @@ export default function PathTracerSettings() {
                   onClick={() => {
                     updateRendererParameter(
                       "IMAGE_RESOLUTION",
-                      `${width}x${height}`
+                      `${width}#${height}`
                     );
                     setPrevWidth(width);
                     setPrevHeight(height);

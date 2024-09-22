@@ -21,6 +21,7 @@ const config = {
     { value: "SJN", label: "Shortest-Job-Next" },
     { value: "PS", label: "Priority Scheduling" },
   ],
+  DEFAULT_SCHEDULING_ALGORITHM: "FCFS",
   SERVER_URL:
     process.env.REACT_APP_ENVIRONMENT === "development"
       ? "localhost:8080"
