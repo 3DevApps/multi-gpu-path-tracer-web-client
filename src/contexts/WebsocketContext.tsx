@@ -45,9 +45,10 @@ export const WebsocketContextProvider = ({ children }: any) => {
       }
       setMessage(parseMessage(rawData));
     };
-    return () => {
+
+    document.addEventListener("beforeunload", () => {
       socket.current?.close();
-    };
+    });
   }, []);
 
   const sendMessage = useCallback((message: string[]) => {
