@@ -34,10 +34,12 @@ function SettingChangeButton({
   value,
   prevValue,
   onClick,
+  disabled = false,
 }: {
   value: any;
   prevValue: any;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   const [style, setStyle] = useState<{
     backgroundColor: string | undefined;
@@ -55,6 +57,7 @@ function SettingChangeButton({
       style={style}
       onClick={onClick}
       type="primary"
+      disabled={disabled}
     >
       {style.backgroundColor === BUTTON_RED ? "\u276f" : "\u2713"}
     </Button>
@@ -66,11 +69,13 @@ function NumberInput({
   setInputValue,
   updateRendererParameter,
   parameterKey,
+  disabled = false,
 }: {
   inputValue: number;
   setInputValue: (value: number) => void;
   updateRendererParameter: (parameterKey: string, value: string) => void;
   parameterKey: string;
+  disabled?: boolean;
 }) {
   const [prevValue, setPrevValue] = useState(inputValue);
 
@@ -82,6 +87,7 @@ function NumberInput({
         placeholder="Recursion depth"
         value={inputValue}
         onChange={(value) => value && setInputValue(value)}
+        disabled={disabled}
       />
       <SettingChangeButton
         value={inputValue}
@@ -90,6 +96,7 @@ function NumberInput({
           updateRendererParameter(parameterKey, inputValue.toString());
           setPrevValue(inputValue);
         }}
+        disabled={disabled}
       />
     </Space.Compact>
   );
@@ -97,7 +104,7 @@ function NumberInput({
 
 export default function PathTracerSettings() {
   const { sendMessage } = useWebSocketConnection();
-  const { jobId } = useContext(JobSettingsContext);
+  const { jobId, isAdmin } = useContext(JobSettingsContext);
   const [asideStyle, setAsideStyle] = useState({ left: 0 });
   const closeButtonStyle = useMemo(
     () => ({
@@ -201,6 +208,7 @@ export default function PathTracerSettings() {
                 onChange={(value) =>
                   updateRendererParameter("SCHEDULING_ALGORITHM", value)
                 }
+                disabled={!isAdmin}
               />
             </Form.Item>
             <Flex align="space-between" justify="space-between">
@@ -210,6 +218,7 @@ export default function PathTracerSettings() {
                   setInputValue={setGpuNumber}
                   updateRendererParameter={updateRendererParameter}
                   parameterKey="GPU_NUMBER"
+                  disabled={!isAdmin}
                 />
               </Form.Item>
               <Form.Item label="Streams per GPU" tooltip="Recursion depth">
@@ -218,6 +227,7 @@ export default function PathTracerSettings() {
                   setInputValue={setStreamsPerGpu}
                   updateRendererParameter={updateRendererParameter}
                   parameterKey="STREAMS_PER_GPU"
+                  disabled={!isAdmin}
                 />
               </Form.Item>
             </Flex>
@@ -228,6 +238,7 @@ export default function PathTracerSettings() {
                   setInputValue={setSamplesPerPixel}
                   updateRendererParameter={updateRendererParameter}
                   parameterKey="SAMPLES_PER_PIXEL"
+                  disabled={!isAdmin}
                 />
               </Form.Item>
               <Form.Item label="Recursion depth" tooltip="Recursion depth">
@@ -236,6 +247,7 @@ export default function PathTracerSettings() {
                   setInputValue={setRecursionDepth}
                   updateRendererParameter={updateRendererParameter}
                   parameterKey="RECURSION_DEPTH"
+                  disabled={!isAdmin}
                 />
               </Form.Item>
             </Flex>
@@ -247,6 +259,7 @@ export default function PathTracerSettings() {
                     className="thread-block-size-input"
                     onChange={(value) => value && setThreadBlockSizeX(value)}
                     value={threadBlockSizeX}
+                    disabled={!isAdmin}
                   />
                   <b>X</b>
                   <InputNumber
@@ -254,6 +267,7 @@ export default function PathTracerSettings() {
                     className="thread-block-size-input"
                     onChange={(value) => value && setThreadBlockSizeY(value)}
                     value={threadBlockSizeY}
+                    disabled={!isAdmin}
                   />
                 </Flex>
                 <SettingChangeButton
@@ -267,6 +281,7 @@ export default function PathTracerSettings() {
                     setPrevThreadBlockSizeX(threadBlockSizeX);
                     setPrevThreadBlockSizeY(threadBlockSizeY);
                   }}
+                  disabled={!isAdmin}
                 />
               </Flex>
             </Form.Item>
@@ -277,6 +292,7 @@ export default function PathTracerSettings() {
                   height={height}
                   setWidth={setWidth}
                   setHeight={setHeight}
+                  disabled={!isAdmin}
                 />
                 <SettingChangeButton
                   value={`${width}x${height}`}
@@ -289,6 +305,7 @@ export default function PathTracerSettings() {
                     setPrevWidth(width);
                     setPrevHeight(height);
                   }}
+                  disabled={!isAdmin}
                 />
               </Flex>
             </Form.Item>
@@ -296,7 +313,11 @@ export default function PathTracerSettings() {
             <Form.Item>
               <Flex align="center" justify="center">
                 <Upload {...uploadProps}>
-                  <Button loading={sceneBeingLoaded} icon={<SettingOutlined />}>
+                  <Button
+                    loading={sceneBeingLoaded}
+                    icon={<SettingOutlined />}
+                    disabled={!isAdmin}
+                  >
                     Load scene
                   </Button>
                 </Upload>

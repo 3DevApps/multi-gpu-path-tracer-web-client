@@ -8,11 +8,13 @@ export default function ImageResolutionInput({
   height,
   setWidth,
   setHeight,
+  disabled,
 }: {
   width: number;
   height: number;
   setWidth: (width: number) => void;
   setHeight: (height: number) => void;
+  disabled?: boolean;
 }) {
   const [aspectRatio, setAspectRatio] = useState(width / height);
   const [shouldMaintainRatio, setShouldMaintainRatio] = useState(true);
@@ -43,11 +45,21 @@ export default function ImageResolutionInput({
   return (
     <Space direction="vertical" align="center">
       <Flex align="center" gap="5px">
-        <InputNumber min={1} value={width} onChange={handleWidthChange} />
+        <InputNumber
+          min={1}
+          value={width}
+          onChange={handleWidthChange}
+          disabled={disabled}
+        />
         <div className="maintain-ratio-button" onClick={handleMaintainRatio}>
           {shouldMaintainRatio ? <LockOutlined /> : <UnlockOutlined />}
         </div>
-        <InputNumber min={1} value={height} onChange={handleHeightChange} />
+        <InputNumber
+          min={1}
+          value={height}
+          onChange={handleHeightChange}
+          disabled={disabled}
+        />
       </Flex>
     </Space>
   );
