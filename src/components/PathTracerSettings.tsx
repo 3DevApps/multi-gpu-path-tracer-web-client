@@ -3,6 +3,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import "./PathTracerSettings.css";
@@ -121,6 +122,13 @@ export default function PathTracerSettings() {
   }, []);
 
   const [sceneBeingLoaded, setSceneBeingLoaded] = useState(false);
+  const filesToUpload = useRef<(string | boolean)[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    {
+      name: string;
+      success: boolean;
+    }[]
+  >([]);
 
   const uploadProps: UploadProps = useMemo(
     () => ({
@@ -131,24 +139,46 @@ export default function PathTracerSettings() {
       maxCount: 2,
       onChange(info) {
         if (info.file.status === "done") {
-          message.success(`${info.file.name} file uploaded successfully!`);
           setSceneBeingLoaded(false);
-
-          // Notify the path tracing job about the new scene
-          sendMessage(["RENDERER_PARAMETER", "NEW_FILE_UPLOADED"]);
+          setUploadedFiles((prev) => [
+            ...prev,
+            { name: info.file.name, success: true },
+          ]);
         } else if (info.file.status === "error") {
-          message.error(`${info.file.name} file upload failed!`);
           setSceneBeingLoaded(false);
+          setUploadedFiles((prev) => [
+            ...prev,
+            { name: info.file.name, success: false },
+          ]);
         }
       },
-      beforeUpload: () => {
+      beforeUpload: (file, fileList) => {
+        filesToUpload.current = fileList.map((file) => file.name);
         setSceneBeingLoaded(true);
         return true;
       },
       showUploadList: false,
     }),
-    [jobId]
+    [jobId, filesToUpload]
   );
+
+  useEffect(() => {
+    if (
+      uploadedFiles.length !== filesToUpload.current.length ||
+      uploadedFiles.length === 0
+    ) {
+      return;
+    }
+
+    if (uploadedFiles.every(({ success }) => success)) {
+      message.success(`Files uploaded successfully!`);
+      sendMessage(["RENDERER_PARAMETER", "LOAD_UPLOADED_SCENE"]);
+    } else {
+      message.error(`File upload failed!`);
+    }
+
+    setUploadedFiles([]);
+  }, [filesToUpload, sendMessage, uploadedFiles]);
 
   const updateRendererParameter = useCallback(
     (parameterKey: string, value: string) => {
@@ -328,6 +358,7 @@ export default function PathTracerSettings() {
             className="download-button"
             type="primary"
             icon={<DownloadOutlined />}
+            onClick={() => sendMessage(["RENDERER_PARAMETER", "DOWNLOAD_SCENE_SNAPSHOT"])}
           >
             Download current scene view
           </Button>
