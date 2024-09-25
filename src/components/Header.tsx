@@ -2,6 +2,9 @@ import React, { useCallback, useState } from "react";
 import "./Header.css";
 import { GithubOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { Modal } from "antd";
+import { Typography } from "antd";
+
+const { Title } = Typography;
 
 export default function Header() {
   const handleGithubClick = useCallback(() => {
@@ -34,10 +37,44 @@ export default function Header() {
           environment.
         </p>
         <br />
-        <p>
-          TODO: Add more information about the project, how to use this,
-          instruction how to modify FOV, move around the scene, etc.
-        </p>
+        <Title level={5}>How to Use This Tool</Title>
+        <ol
+          style={{
+            listStyle: "number inside",
+          }}
+        >
+          <li>
+            <strong>Load the Scene:</strong> Initialize and load the environment
+            you wish to explore.
+          </li>
+          <li>
+            <strong>Modify Default Path Tracer Settings:</strong> Customize the
+            path tracer settings to suit your preferences and needs.
+          </li>
+          <li>
+            <strong>Navigating the Scene:</strong>
+          </li>
+          <ul>
+            <li>
+              <em>Rotate the Camera:</em> Click and drag the mouse to adjust the
+              camera view.
+            </li>
+            <li>
+              <em>Move the Camera:</em> Use <kbd>W</kbd>, <kbd>A</kbd>,{" "}
+              <kbd>S</kbd>, and <kbd>D</kbd> keys for forward, left, backward,
+              and right movements, respectively.
+            </li>
+            <li>
+              <em>Vertical Movement:</em> Use <kbd>Q</kbd> and <kbd>E</kbd> keys
+              to move the camera up and down.
+            </li>
+            <li>
+              <em>Adjust Camera FOV:</em> Press <kbd>CTRL</kbd> + <kbd>[</kbd>{" "}
+              or <kbd>CTRL</kbd> + <kbd>]</kbd> to modify the camera's field of
+              view.
+            </li>
+          </ul>
+        </ol>{" "}
         <br />
         <p>Authors: Patryk Klatka, Wojciech Łoboda, Bartłomiej Tempka</p>
       </Modal>

@@ -229,7 +229,7 @@ export default function PathTracerSettings() {
           <Form layout="vertical">
             <Form.Item
               label="Scheduling algorithm"
-              tooltip="Select a scheduling algorithm"
+              tooltip="Algorithm used to schedule the rendering tasks."
             >
               <Select
                 placeholder="Select a scheduling algorithm"
@@ -242,7 +242,10 @@ export default function PathTracerSettings() {
               />
             </Form.Item>
             <Flex align="space-between" justify="space-between">
-              <Form.Item label="GPU number" tooltip="Recursion depth">
+              <Form.Item
+                label="GPU number"
+                tooltip="Number of GPUs used for rendering."
+              >
                 <NumberInput
                   inputValue={gpuNumber}
                   setInputValue={setGpuNumber}
@@ -251,7 +254,10 @@ export default function PathTracerSettings() {
                   disabled={!isAdmin}
                 />
               </Form.Item>
-              <Form.Item label="Streams per GPU" tooltip="Recursion depth">
+              <Form.Item
+                label="Streams per GPU"
+                tooltip="Streams allow for asynchronous execution of operations on the GPU, enabling overlapping computation and communication to improve performance."
+              >
                 <NumberInput
                   inputValue={streamsPerGpu}
                   setInputValue={setStreamsPerGpu}
@@ -262,7 +268,10 @@ export default function PathTracerSettings() {
               </Form.Item>
             </Flex>
             <Flex align="space-between" justify="space-between">
-              <Form.Item label="Samples per pixel" tooltip="Recursion depth">
+              <Form.Item
+                label="Samples per pixel"
+                tooltip="The number of light paths or rays traced per pixel during the rendering process."
+              >
                 <NumberInput
                   inputValue={samplesPerPixel}
                   setInputValue={setSamplesPerPixel}
@@ -271,7 +280,10 @@ export default function PathTracerSettings() {
                   disabled={!isAdmin}
                 />
               </Form.Item>
-              <Form.Item label="Recursion depth" tooltip="Recursion depth">
+              <Form.Item
+                label="Recursion depth"
+                tooltip="The maximum number of times a ray can bounce or reflect within a scene before the algorithm terminates that path."
+              >
                 <NumberInput
                   inputValue={recursionDepth}
                   setInputValue={setRecursionDepth}
@@ -281,7 +293,10 @@ export default function PathTracerSettings() {
                 />
               </Form.Item>
             </Flex>
-            <Form.Item label="Thread block size" tooltip="hehe">
+            <Form.Item
+              label="Thread block size"
+              tooltip="The size of single Thread Block in the Grid."
+            >
               <Flex align="space-around" justify="space-around">
                 <Flex align="center" gap="5px">
                   <InputNumber
@@ -358,7 +373,9 @@ export default function PathTracerSettings() {
             className="download-button"
             type="primary"
             icon={<DownloadOutlined />}
-            onClick={() => sendMessage(["RENDERER_PARAMETER", "DOWNLOAD_SCENE_SNAPSHOT"])}
+            onClick={() =>
+              sendMessage(["RENDERER_PARAMETER", "DOWNLOAD_SCENE_SNAPSHOT"])
+            }
           >
             Download current scene view
           </Button>
