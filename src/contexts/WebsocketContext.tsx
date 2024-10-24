@@ -36,15 +36,10 @@ export const WebsocketContextProvider = ({ children }: any) => {
   const [renderData, setRenderData] = useState<Blob | null>(null);
   const socket = useRef<WebSocket | null>(null);
 
-  const webSocketUrl = useMemo(() => {
-    const url = new URL(window.location.href);
-    if (url.searchParams.has("jobId")) {
-      return `${config.WS_SERVER_URL}${
-        window.location.search ? `${window.location.search}&` : "?"
-      }jobId=${url.searchParams.get("jobId")}`;
-    }
-    return config.WS_SERVER_URL;
-  }, []);
+  const webSocketUrl = useMemo(
+    () => `${config.WS_SERVER_URL}${window.location.search}`,
+    []
+  );
 
   useEffect(() => {
     socket.current = new WebSocket(webSocketUrl);
