@@ -39,7 +39,9 @@ export const WebsocketContextProvider = ({ children }: any) => {
   const webSocketUrl = useMemo(() => {
     const url = new URL(window.location.href);
     if (url.searchParams.has("jobId")) {
-      return `${config.WS_SERVER_URL}?jobId=${url.searchParams.get("jobId")}`;
+      return `${config.WS_SERVER_URL}${
+        window.location.search ? `${window.location.search}&` : "?"
+      }jobId=${url.searchParams.get("jobId")}`;
     }
     return config.WS_SERVER_URL;
   }, []);
@@ -71,7 +73,7 @@ export const WebsocketContextProvider = ({ children }: any) => {
     document.addEventListener("beforeunload", () => {
       socket.current?.close();
     });
-  }, []);
+  }, [webSocketUrl]);
 
   const sendMessage = useCallback((message: string[]) => {
     if (socket.current?.readyState === WebSocket.OPEN) {

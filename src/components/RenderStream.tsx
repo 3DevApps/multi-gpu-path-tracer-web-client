@@ -49,33 +49,6 @@ function useKeyPressHandler() {
       newSpeed > MAX_SPEED ? MAX_SPEED.toString() : newSpeed.toString();
   }, []);
 
-  const onKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (
-        keyPressIntervalMap.current[event.key] ||
-        initialKeyPressTimeoutMap.current[event.key]
-      ) {
-        return;
-      }
-      keyPressHandler(event);
-      initialKeyPressTimeoutMap.current[event.key] = setTimeout(() => {
-        keyPressIntervalMap.current[event.key] = setInterval(() => {
-          keyPressHandler(event);
-        }, 50);
-      }, 300);
-    },
-    [moveSpeed]
-  );
-
-  const onKeyUp = useCallback((event: KeyboardEvent) => {
-    clearInterval(keyPressIntervalMap.current[event.key]);
-    delete keyPressIntervalMap.current[event.key];
-    clearTimeout(initialKeyPressTimeoutMap.current[event.key]);
-    delete initialKeyPressTimeoutMap.current[event.key];
-
-    moveSpeed.current = MIN_SPEED.toString();
-  }, []);
-
   const keyPressHandler = useCallback(
     (event: KeyboardEvent) => {
       const key = event.key.toUpperCase();
@@ -111,6 +84,33 @@ function useKeyPressHandler() {
     },
     [moveSpeed, sendMessage, increaseSpeed]
   );
+
+  const onKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (
+        keyPressIntervalMap.current[event.key] ||
+        initialKeyPressTimeoutMap.current[event.key]
+      ) {
+        return;
+      }
+      keyPressHandler(event);
+      initialKeyPressTimeoutMap.current[event.key] = setTimeout(() => {
+        keyPressIntervalMap.current[event.key] = setInterval(() => {
+          keyPressHandler(event);
+        }, 50);
+      }, 300);
+    },
+    [keyPressHandler]
+  );
+
+  const onKeyUp = useCallback((event: KeyboardEvent) => {
+    clearInterval(keyPressIntervalMap.current[event.key]);
+    delete keyPressIntervalMap.current[event.key];
+    clearTimeout(initialKeyPressTimeoutMap.current[event.key]);
+    delete initialKeyPressTimeoutMap.current[event.key];
+
+    moveSpeed.current = MIN_SPEED.toString();
+  }, []);
 
   useEffect(() => {
     window.addEventListener("keydown", onKeyDown);

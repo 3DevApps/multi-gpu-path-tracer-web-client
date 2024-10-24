@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { RenderStatistics } from "../components/RenderStatistics";
 import { WebsocketContext } from "../contexts/WebsocketContext";
 import { JobSettingsContext } from "../contexts/JobSettingsContext";
@@ -6,9 +6,14 @@ import { message as messageApi } from "antd";
 
 export function useHandleWebSocketMessages() {
   const { message, sendMessage } = useContext(WebsocketContext);
-  const { setIsAdmin } = useContext(JobSettingsContext);
+  const { setIsAdmin, isDebugJob } = useContext(JobSettingsContext);
   const [renderStatistics, setRenderStatistics] = useState<RenderStatistics>(
     []
+  );
+
+  const notifyUser = useCallback(
+    (data: any) => (isDebugJob ? console.log(data) : messageApi.open(data)),
+    [isDebugJob]
   );
 
   useEffect(() => {
@@ -31,7 +36,7 @@ export function useHandleWebSocketMessages() {
       case "NOTIFICATION":
         switch (message[1]) {
           case "LOADING":
-            messageApi.open({
+            notifyUser({
               key: message[2],
               type: "loading",
               content: message[3],
@@ -39,7 +44,7 @@ export function useHandleWebSocketMessages() {
             });
             break;
           case "SUCCESS":
-            messageApi.open({
+            notifyUser({
               key: message[2],
               type: "success",
               content: message[3],
@@ -52,7 +57,7 @@ export function useHandleWebSocketMessages() {
       default:
         break;
     }
-  }, [message, sendMessage]);
+  }, [message, sendMessage, setIsAdmin, notifyUser]);
 
   return { renderStatistics };
 }

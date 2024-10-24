@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { InputNumber, Flex, Space, Button } from "antd";
+import { InputNumber, Flex, Space } from "antd";
 import { LockOutlined, UnlockOutlined } from "@ant-design/icons";
 import "./ImageResolutionInput.css";
 
