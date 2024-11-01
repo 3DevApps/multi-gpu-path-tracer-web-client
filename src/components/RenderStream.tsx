@@ -1,37 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {
+  useEffect,
+  useCallback,
+  MouseEventHandler,
+  useRef,
+} from "react";
 import "./RenderStream.css";
 import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
-
-function useMouseHandler() {
-  const { sendMessage } = useWebSocketConnection();
-  const [isMouseDown, setIsMouseDown] = useState(false);
-
-  const handleMouseDown = useCallback(() => setIsMouseDown(true), []);
-  const handleMouseUp = useCallback(() => setIsMouseDown(false), []);
-  const handleMouseMove = useCallback(
-    ({ movementX, movementY }: any) => {
-      if (!isMouseDown) {
-        return;
-      }
-      sendMessage(["MOUSE_MOVE", movementX, movementY]);
-    },
-    [isMouseDown, sendMessage]
-  );
-
-  useEffect(() => {
-    if (isMouseDown) {
-      window.addEventListener("mouseup", handleMouseUp);
-    } else {
-      window.removeEventListener("mouseup", handleMouseUp);
-    }
-
-    return () => {
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isMouseDown, handleMouseUp]);
-
-  return { handleMouseDown, handleMouseMove };
-}
+import { useMouseHandler } from "../hooks/useMouseHandler";
+import H264Decoder from "../utils/H264Decoder";
 
 const MIN_SPEED = 5;
 const MAX_SPEED = 50;
@@ -123,16 +99,53 @@ function useKeyPressHandler() {
   }, [onKeyDown, onKeyUp]);
 }
 
+function useFrameHandler(
+  canvasRef: React.RefObject<HTMLCanvasElement>,
+  renderData: Blob | null
+) {
+  const frameHandler = useCallback((frame: VideoFrame) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx!.drawImage(frame, 0, 0);
+  }, []);
+
+  const decoder = useRef<H264Decoder | null>(
+    new H264Decoder(400, 400, frameHandler)
+  );
+
+  useEffect(() => {
+    const fn = async () => {
+      if (!renderData) {
+        return;
+      }
+
+      const arrayBuffer = await renderData.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      await decoder.current?.decode(uint8Array);
+    };
+
+    fn();
+  }, [renderData]);
+}
+
 export default function RenderStream() {
   useKeyPressHandler();
-  const { renderData } = useWebSocketConnection();
-  const { handleMouseDown, handleMouseMove } = useMouseHandler();
+  const { sendMessage, renderData } = useWebSocketConnection();
+
+  const mouseMoveHandler: MouseEventHandler<HTMLElement> = useCallback((e) => {
+    const { movementX, movementY } = e;
+    sendMessage(["MOUSE_MOVE", movementX.toString(), movementY.toString()]);
+  }, []);
+  const { handleMouseDown, handleMouseMove } =
+    useMouseHandler(mouseMoveHandler);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useFrameHandler(canvasRef, renderData);
 
   return (
     <section onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}>
-      {renderData && (
-        <img src={URL.createObjectURL(renderData)} alt="renderStream" />
-      )}
+      <canvas ref={canvasRef} width="400" height="400"></canvas>
     </section>
   );
 }
