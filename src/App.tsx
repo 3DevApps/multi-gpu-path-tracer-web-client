@@ -7,6 +7,7 @@ import RenderStatistics from "./components/RenderStatistics";
 import { useHandleWebSocketMessages } from "./hooks/useHandleWebSocketMessages";
 import { WebsocketContextProvider } from "./contexts/WebsocketContext";
 import { JobSettingsContextProvider } from "./contexts/JobSettingsContext";
+import { PathTracerParamsContextProvider } from "./contexts/PathTracerParamsContext";
 
 function App() {
   const { renderStatistics } = useHandleWebSocketMessages();
@@ -27,7 +28,9 @@ export default function AppWrapper() {
   return (
     <WebsocketContextProvider>
       <JobSettingsContextProvider>
-        <App />
+        <PathTracerParamsContextProvider>
+          <App />
+        </PathTracerParamsContextProvider>
       </JobSettingsContextProvider>
     </WebsocketContextProvider>
   );

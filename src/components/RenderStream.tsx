@@ -3,11 +3,13 @@ import React, {
   useCallback,
   MouseEventHandler,
   useRef,
+  useContext,
 } from "react";
 import "./RenderStream.css";
 import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
 import { useMouseHandler } from "../hooks/useMouseHandler";
 import H264Decoder from "../utils/H264Decoder";
+import { PathTracerParamsContext } from "../contexts/PathTracerParamsContext";
 
 const MIN_SPEED = 5;
 const MAX_SPEED = 50;
@@ -103,6 +105,7 @@ function useFrameHandler(
   canvasRef: React.RefObject<HTMLCanvasElement>,
   renderData: Blob | null
 ) {
+  const { width, height } = useContext(PathTracerParamsContext);
   const frameHandler = useCallback((frame: VideoFrame) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -111,8 +114,12 @@ function useFrameHandler(
   }, []);
 
   const decoder = useRef<H264Decoder | null>(
-    new H264Decoder(400, 400, frameHandler)
+    new H264Decoder(width, height, frameHandler)
   );
+
+  useEffect(() => {
+    decoder.current?.resetDecoder(width, height);
+  }, [width, height]);
 
   useEffect(() => {
     const fn = async () => {
@@ -132,6 +139,7 @@ function useFrameHandler(
 export default function RenderStream() {
   useKeyPressHandler();
   const { sendMessage, renderData } = useWebSocketConnection();
+  const { width, height } = useContext(PathTracerParamsContext);
 
   const mouseMoveHandler: MouseEventHandler<HTMLElement> = useCallback((e) => {
     const { movementX, movementY } = e;
@@ -145,7 +153,7 @@ export default function RenderStream() {
 
   return (
     <section onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}>
-      <canvas ref={canvasRef} width="400" height="400"></canvas>
+      <canvas ref={canvasRef} width={width} height={height}></canvas>
     </section>
   );
 }

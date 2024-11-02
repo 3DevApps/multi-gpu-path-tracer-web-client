@@ -1,35 +1,36 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { InputNumber, Flex, Space } from "antd";
 import { LockOutlined, UnlockOutlined } from "@ant-design/icons";
 import "./ImageResolutionInput.css";
+import SettingChangeButton from "./SettingChangeButton";
+import { PathTracerParamsContext } from "../contexts/PathTracerParamsContext";
 
 export default function ImageResolutionInput({
-  width,
-  height,
-  setWidth,
-  setHeight,
+  updateRendererParameter,
   disabled,
 }: {
-  width: number;
-  height: number;
-  setWidth: (width: number) => void;
-  setHeight: (height: number) => void;
+  updateRendererParameter: (key: string, value: string) => void;
   disabled?: boolean;
 }) {
-  const [aspectRatio, setAspectRatio] = useState(width / height);
+  const pathTracerParams = useContext(PathTracerParamsContext);
+  const [aspectRatio, setAspectRatio] = useState(
+    pathTracerParams.width / pathTracerParams.height
+  );
   const [shouldMaintainRatio, setShouldMaintainRatio] = useState(true);
+  const [internalWidth, setInternalWidth] = useState(pathTracerParams.width);
+  const [internalHeight, setInternalHeight] = useState(pathTracerParams.height);
 
   const handleWidthChange = (value: any) => {
-    setWidth(value);
+    setInternalWidth(value);
     if (shouldMaintainRatio) {
-      setHeight(Math.round(value / aspectRatio));
+      setInternalHeight(Math.round(value / aspectRatio));
     }
   };
 
   const handleHeightChange = (value: any) => {
-    setHeight(value);
+    setInternalHeight(value);
     if (shouldMaintainRatio) {
-      setWidth(Math.round(value * aspectRatio));
+      setInternalWidth(Math.round(value * aspectRatio));
     }
   };
 
@@ -38,29 +39,46 @@ export default function ImageResolutionInput({
       setShouldMaintainRatio(false);
     } else {
       setShouldMaintainRatio(true);
-      setAspectRatio(width / height);
+      setAspectRatio(internalWidth / internalHeight);
     }
   };
 
   return (
-    <Space direction="vertical" align="center">
-      <Flex align="center" gap="5px">
-        <InputNumber
-          min={1}
-          value={width}
-          onChange={handleWidthChange}
-          disabled={disabled}
-        />
-        <div className="maintain-ratio-button" onClick={handleMaintainRatio}>
-          {shouldMaintainRatio ? <LockOutlined /> : <UnlockOutlined />}
-        </div>
-        <InputNumber
-          min={1}
-          value={height}
-          onChange={handleHeightChange}
-          disabled={disabled}
-        />
-      </Flex>
-    </Space>
+    <Flex align="space-around" justify="space-around">
+      <Space direction="vertical" align="center">
+        <Flex align="center" gap="5px">
+          <InputNumber
+            min={1}
+            value={internalWidth}
+            onChange={handleWidthChange}
+            disabled={disabled}
+          />
+          <div className="maintain-ratio-button" onClick={handleMaintainRatio}>
+            {shouldMaintainRatio ? <LockOutlined /> : <UnlockOutlined />}
+          </div>
+          <InputNumber
+            min={1}
+            value={internalHeight}
+            onChange={handleHeightChange}
+            disabled={disabled}
+          />
+        </Flex>
+      </Space>
+      <SettingChangeButton
+        value={`${internalWidth}x${internalHeight}`}
+        prevValue={`${pathTracerParams.prevWidth}x${pathTracerParams.prevHeight}`}
+        onClick={() => {
+          updateRendererParameter(
+            "IMAGE_RESOLUTION",
+            `${internalWidth}#${internalHeight}`
+          );
+          pathTracerParams.setPrevWidth(internalWidth);
+          pathTracerParams.setPrevHeight(internalHeight);
+          pathTracerParams.setWidth(internalWidth);
+          pathTracerParams.setHeight(internalHeight);
+        }}
+        disabled={disabled}
+      />
+    </Flex>
   );
 }

@@ -28,42 +28,9 @@ import ImageResolutionInput from "./ImageResolutionInput";
 import config from "../config/config";
 import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
 import { JobSettingsContext } from "../contexts/JobSettingsContext";
-
-const BUTTON_RED = "#ff0021";
-
-function SettingChangeButton({
-  value,
-  prevValue,
-  onClick,
-  disabled = false,
-}: {
-  value: any;
-  prevValue: any;
-  onClick: () => void;
-  disabled?: boolean;
-}) {
-  const [style, setStyle] = useState<{
-    backgroundColor: string | undefined;
-  }>({ backgroundColor: undefined });
-
-  useEffect(() => {
-    setStyle({
-      backgroundColor: value === prevValue ? undefined : BUTTON_RED,
-    });
-  }, [value, prevValue]);
-
-  return (
-    <Button
-      className="setting-change-button"
-      style={style}
-      onClick={onClick}
-      type="primary"
-      disabled={disabled}
-    >
-      {style.backgroundColor === BUTTON_RED ? "\u276f" : "\u2713"}
-    </Button>
-  );
-}
+import { PathTracerParamsContext } from "../contexts/PathTracerParamsContext";
+import SettingChangeButton from "./SettingChangeButton";
+import ThreadBlockSizeInput from "./ThreadBlockSizeInput";
 
 function NumberInput({
   inputValue,
@@ -71,34 +38,39 @@ function NumberInput({
   updateRendererParameter,
   parameterKey,
   disabled = false,
+  showSettingChangeButton = true,
 }: {
   inputValue: number;
   setInputValue: (value: number) => void;
   updateRendererParameter: (parameterKey: string, value: string) => void;
   parameterKey: string;
   disabled?: boolean;
+  showSettingChangeButton?: boolean;
 }) {
   const [prevValue, setPrevValue] = useState(inputValue);
+  const [value, setValue] = useState(inputValue);
 
   return (
     <Space.Compact>
       <InputNumber
         className="number-input"
         min={1}
-        placeholder="Recursion depth"
-        value={inputValue}
-        onChange={(value) => value && setInputValue(value)}
+        value={value}
+        onChange={(value) => value && setValue(value)}
         disabled={disabled}
       />
-      <SettingChangeButton
-        value={inputValue}
-        prevValue={prevValue}
-        onClick={() => {
-          updateRendererParameter(parameterKey, inputValue.toString());
-          setPrevValue(inputValue);
-        }}
-        disabled={disabled}
-      />
+      {showSettingChangeButton && (
+        <SettingChangeButton
+          value={value}
+          prevValue={prevValue}
+          onClick={() => {
+            updateRendererParameter(parameterKey, value.toString());
+            setPrevValue(value);
+            setInputValue(value);
+          }}
+          disabled={disabled}
+        />
+      )}
     </Space.Compact>
   );
 }
@@ -186,39 +158,7 @@ export default function PathTracerSettings() {
     [sendMessage]
   );
 
-  // TODO: This could be solved by using a context
-  const [gpuNumber, setGpuNumber] = useState(config.DEFAULT_GPU_NUMBER);
-  const [streamsPerGpu, setStreamsPerGpu] = useState(
-    config.DEFAULT_STREAMS_PER_GPU
-  );
-  const [samplesPerPixel, setSamplesPerPixel] = useState(
-    config.DEFAULT_SAMPLES_PER_PIXEL
-  );
-  const [recursionDepth, setRecursionDepth] = useState(
-    config.DEFAULT_RECURSION_DEPTH
-  );
-
-  const [width, setWidth] = useState(config.DEFAULT_IMAGE_RESOLUTION.WIDTH);
-  const [prevWidth, setPrevWidth] = useState(
-    config.DEFAULT_IMAGE_RESOLUTION.WIDTH
-  );
-  const [height, setHeight] = useState(config.DEFAULT_IMAGE_RESOLUTION.HEIGHT);
-  const [prevHeight, setPrevHeight] = useState(
-    config.DEFAULT_IMAGE_RESOLUTION.HEIGHT
-  );
-
-  const [threadBlockSizeX, setThreadBlockSizeX] = useState(
-    config.DEFAULT_THREAD_BLOCK_SIZE_X
-  );
-  const [prevThreadBlockSizeX, setPrevThreadBlockSizeX] = useState(
-    config.DEFAULT_THREAD_BLOCK_SIZE_X
-  );
-  const [threadBlockSizeY, setThreadBlockSizeY] = useState(
-    config.DEFAULT_THREAD_BLOCK_SIZE_Y
-  );
-  const [prevThreadBlockSizeY, setPrevThreadBlockSizeY] = useState(
-    config.DEFAULT_THREAD_BLOCK_SIZE_Y
-  );
+  const pathTracerParams = useContext(PathTracerParamsContext);
 
   return (
     <aside className="path-tracer-settings" style={asideStyle}>
@@ -246,8 +186,8 @@ export default function PathTracerSettings() {
                 tooltip="Number of GPUs used for rendering."
               >
                 <NumberInput
-                  inputValue={gpuNumber}
-                  setInputValue={setGpuNumber}
+                  inputValue={pathTracerParams.gpuNumber}
+                  setInputValue={pathTracerParams.setGpuNumber}
                   updateRendererParameter={updateRendererParameter}
                   parameterKey="GPU_NUMBER"
                   disabled={!isAdmin}
@@ -258,8 +198,8 @@ export default function PathTracerSettings() {
                 tooltip="Streams allow for asynchronous execution of operations on the GPU, enabling overlapping computation and communication to improve performance."
               >
                 <NumberInput
-                  inputValue={streamsPerGpu}
-                  setInputValue={setStreamsPerGpu}
+                  inputValue={pathTracerParams.streamsPerGpu}
+                  setInputValue={pathTracerParams.setStreamsPerGpu}
                   updateRendererParameter={updateRendererParameter}
                   parameterKey="STREAMS_PER_GPU"
                   disabled={!isAdmin}
@@ -272,8 +212,8 @@ export default function PathTracerSettings() {
                 tooltip="The number of light paths or rays traced per pixel during the rendering process."
               >
                 <NumberInput
-                  inputValue={samplesPerPixel}
-                  setInputValue={setSamplesPerPixel}
+                  inputValue={pathTracerParams.samplesPerPixel}
+                  setInputValue={pathTracerParams.setSamplesPerPixel}
                   updateRendererParameter={updateRendererParameter}
                   parameterKey="SAMPLES_PER_PIXEL"
                   disabled={!isAdmin}
@@ -284,8 +224,8 @@ export default function PathTracerSettings() {
                 tooltip="The maximum number of times a ray can bounce or reflect within a scene before the algorithm terminates that path."
               >
                 <NumberInput
-                  inputValue={recursionDepth}
-                  setInputValue={setRecursionDepth}
+                  inputValue={pathTracerParams.recursionDepth}
+                  setInputValue={pathTracerParams.setRecursionDepth}
                   updateRendererParameter={updateRendererParameter}
                   parameterKey="RECURSION_DEPTH"
                   disabled={!isAdmin}
@@ -296,62 +236,16 @@ export default function PathTracerSettings() {
               label="Thread block size"
               tooltip="The size of single Thread Block in the Grid."
             >
-              <Flex align="space-around" justify="space-around">
-                <Flex align="center" gap="5px">
-                  <InputNumber
-                    min={1}
-                    className="thread-block-size-input"
-                    onChange={(value) => value && setThreadBlockSizeX(value)}
-                    value={threadBlockSizeX}
-                    disabled={!isAdmin}
-                  />
-                  <b>X</b>
-                  <InputNumber
-                    min={1}
-                    className="thread-block-size-input"
-                    onChange={(value) => value && setThreadBlockSizeY(value)}
-                    value={threadBlockSizeY}
-                    disabled={!isAdmin}
-                  />
-                </Flex>
-                <SettingChangeButton
-                  value={`${threadBlockSizeX}x${threadBlockSizeY}`}
-                  prevValue={`${prevThreadBlockSizeX}x${prevThreadBlockSizeY}`}
-                  onClick={() => {
-                    updateRendererParameter(
-                      "THREAD_BLOCK_SIZE",
-                      `${threadBlockSizeX}#${threadBlockSizeY}`
-                    );
-                    setPrevThreadBlockSizeX(threadBlockSizeX);
-                    setPrevThreadBlockSizeY(threadBlockSizeY);
-                  }}
-                  disabled={!isAdmin}
-                />
-              </Flex>
+              <ThreadBlockSizeInput
+                updateRendererParameter={updateRendererParameter}
+                disabled={!isAdmin}
+              />
             </Form.Item>
             <Form.Item label="Image resolution (width x height)">
-              <Flex align="space-around" justify="space-around">
-                <ImageResolutionInput
-                  width={width}
-                  height={height}
-                  setWidth={setWidth}
-                  setHeight={setHeight}
-                  disabled={!isAdmin}
-                />
-                <SettingChangeButton
-                  value={`${width}x${height}`}
-                  prevValue={`${prevWidth}x${prevHeight}`}
-                  onClick={() => {
-                    updateRendererParameter(
-                      "IMAGE_RESOLUTION",
-                      `${width}#${height}`
-                    );
-                    setPrevWidth(width);
-                    setPrevHeight(height);
-                  }}
-                  disabled={!isAdmin}
-                />
-              </Flex>
+              <ImageResolutionInput
+                updateRendererParameter={updateRendererParameter}
+                disabled={!isAdmin}
+              />
             </Form.Item>
             <Divider />
             <Form.Item>

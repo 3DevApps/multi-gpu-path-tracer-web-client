@@ -1,3 +1,5 @@
+import { notification } from "antd";
+
 type OnFrameCallback = (frame: VideoFrame) => void;
 
 export default class H264Decoder {
@@ -10,7 +12,8 @@ export default class H264Decoder {
   onFrame: OnFrameCallback;
 
   constructor(width: number, height: number, onFrame: OnFrameCallback) {
-    this.codecString = "avc1.42001E"; // Baseline profile
+    // this.codecString = "avc1.42001E"; // Baseline profile
+    this.codecString = "avc1.640034"; // High profile
     this.optimizeForLatency = true;
     this.width = width;
     this.height = height;
@@ -21,7 +24,7 @@ export default class H264Decoder {
     this.initDecoder();
   }
 
-  async initDecoder() {
+  private async initDecoder() {
     const config = {
       codec: this.codecString,
       codedWidth: this.width,
@@ -30,8 +33,13 @@ export default class H264Decoder {
     };
 
     if (!VideoDecoder.isConfigSupported(config)) {
-      // TODO: inform user to change browser
-      throw new Error("Unsupported codec configuration");
+      const errorMessage =
+        "Unsupported codec configuration! Please use a different browser.";
+      notification.error({
+        message: "Decoder configuration",
+        description: errorMessage,
+      });
+      throw new Error(errorMessage);
     }
 
     this.decoder = new VideoDecoder({
@@ -41,7 +49,14 @@ export default class H264Decoder {
     this.decoder.configure(config);
   }
 
-  parseNALUnits(data: Uint8Array): Uint8Array[] {
+  resetDecoder(newWidth: number, newHeight: number) {
+    this.width = newWidth;
+    this.height = newHeight;
+    this.destroy();
+    this.initDecoder();
+  }
+
+  private parseNALUnits(data: Uint8Array): Uint8Array[] {
     const units: Uint8Array[] = [];
     let startIndex = 0;
 
@@ -71,7 +86,7 @@ export default class H264Decoder {
     return units;
   }
 
-  isKeyFrame(nalUnit: Uint8Array): boolean {
+  private isKeyFrame(nalUnit: Uint8Array): boolean {
     const nalType = nalUnit[0] & 0x1f;
     return nalType === 5;
   }
@@ -94,7 +109,7 @@ export default class H264Decoder {
     this.firstFrame = false;
   }
 
-  handleFrame(frame: VideoFrame) {
+  private handleFrame(frame: VideoFrame) {
     try {
       this.onFrame(frame);
     } finally {
@@ -102,9 +117,11 @@ export default class H264Decoder {
     }
   }
 
-  destroy() {
+  private destroy() {
     if (this.decoder) {
       this.decoder.close();
+      this.decoder = null;
     }
+    this.firstFrame = true;
   }
 }
