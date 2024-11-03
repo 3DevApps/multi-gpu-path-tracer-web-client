@@ -6,10 +6,10 @@ import React, {
   useContext,
 } from "react";
 import "./RenderStream.css";
-import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
-import { useMouseHandler } from "../hooks/useMouseHandler";
-import H264Decoder from "../utils/H264Decoder";
-import { PathTracerParamsContext } from "../contexts/PathTracerParamsContext";
+import { useWebSocketConnection } from "../../hooks/useWebSocketConnection";
+import { useMouseHandler } from "../../hooks/useMouseHandler";
+import H264Decoder from "../../utils/H264Decoder";
+import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext";
 
 const MIN_SPEED = 5;
 const MAX_SPEED = 50;
@@ -106,12 +106,15 @@ function useFrameHandler(
   renderData: Blob | null
 ) {
   const { width, height } = useContext(PathTracerParamsContext);
-  const frameHandler = useCallback((frame: VideoFrame) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    ctx!.drawImage(frame, 0, 0);
-  }, []);
+  const frameHandler = useCallback(
+    (frame: VideoFrame) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      ctx!.drawImage(frame, 0, 0);
+    },
+    [canvasRef]
+  );
 
   const decoder = useRef<H264Decoder | null>(
     new H264Decoder(width, height, frameHandler)
@@ -141,10 +144,13 @@ export default function RenderStream() {
   const { sendMessage, renderData } = useWebSocketConnection();
   const { width, height } = useContext(PathTracerParamsContext);
 
-  const mouseMoveHandler: MouseEventHandler<HTMLElement> = useCallback((e) => {
-    const { movementX, movementY } = e;
-    sendMessage(["MOUSE_MOVE", movementX.toString(), movementY.toString()]);
-  }, []);
+  const mouseMoveHandler: MouseEventHandler<HTMLElement> = useCallback(
+    (e) => {
+      const { movementX, movementY } = e;
+      sendMessage(["MOUSE_MOVE", movementX.toString(), movementY.toString()]);
+    },
+    [sendMessage]
+  );
   const { handleMouseDown, handleMouseMove } =
     useMouseHandler(mouseMoveHandler);
 

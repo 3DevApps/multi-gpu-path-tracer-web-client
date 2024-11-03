@@ -3,7 +3,7 @@ import { InputNumber, Flex, Space } from "antd";
 import { LockOutlined, UnlockOutlined } from "@ant-design/icons";
 import "./ImageResolutionInput.css";
 import SettingChangeButton from "./SettingChangeButton";
-import { PathTracerParamsContext } from "../contexts/PathTracerParamsContext";
+import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext";
 
 export default function ImageResolutionInput({
   updateRendererParameter,

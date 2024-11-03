@@ -8,13 +8,8 @@ section {
   overflow: hidden;
 }
 
-canvas {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-section img {
+section img,
+section canvas {
   width: 100%;
   height: 100%;
   object-fit: cover;

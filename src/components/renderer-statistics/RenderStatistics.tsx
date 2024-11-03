@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import "./RenderStatistics.css";
 import { LeftOutlined } from "@ant-design/icons";
-import { useMouseHandler } from "../hooks/useMouseHandler";
+import { useMouseHandler } from "../../hooks/useMouseHandler";
 import Chart from "./Chart";
 
 export type RenderStatistics = string[];

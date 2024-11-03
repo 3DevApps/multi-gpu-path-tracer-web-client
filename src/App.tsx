@@ -1,9 +1,9 @@
 import React from "react";
 import "./App.css";
-import Header from "./components/Header";
-import PathTracerSettings from "./components/PathTracerSettings";
-import RenderStream from "./components/RenderStream";
-import RenderStatistics from "./components/RenderStatistics";
+import Header from "./components/header/Header";
+import PathTracerSettings from "./components/path-tracer-settings/PathTracerSettings";
+import RenderStream from "./components/renderer-stream/RenderStream";
+import RenderStatistics from "./components/renderer-statistics/RenderStatistics";
 import { useHandleWebSocketMessages } from "./hooks/useHandleWebSocketMessages";
 import { WebsocketContextProvider } from "./contexts/WebsocketContext";
 import { JobSettingsContextProvider } from "./contexts/JobSettingsContext";

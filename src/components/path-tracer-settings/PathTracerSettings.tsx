@@ -25,10 +25,10 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 import ImageResolutionInput from "./ImageResolutionInput";
-import config from "../config/config";
-import { useWebSocketConnection } from "../hooks/useWebSocketConnection";
-import { JobSettingsContext } from "../contexts/JobSettingsContext";
-import { PathTracerParamsContext } from "../contexts/PathTracerParamsContext";
+import config from "../../config/config";
+import { useWebSocketConnection } from "../../hooks/useWebSocketConnection";
+import { JobSettingsContext } from "../../contexts/JobSettingsContext";
+import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext";
 import SettingChangeButton from "./SettingChangeButton";
 import ThreadBlockSizeInput from "./ThreadBlockSizeInput";
 

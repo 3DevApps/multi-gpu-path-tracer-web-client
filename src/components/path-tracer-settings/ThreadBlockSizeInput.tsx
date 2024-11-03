@@ -1,7 +1,7 @@
 import { Flex, InputNumber } from "antd";
 import React, { useContext } from "react";
 import SettingChangeButton from "./SettingChangeButton";
-import { PathTracerParamsContext } from "../contexts/PathTracerParamsContext";
+import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext";
 
 export default function ThreadBlockSizeInput({
   updateRendererParameter,

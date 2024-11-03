@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { RenderStatistics } from "../components/RenderStatistics";
+import { RenderStatistics } from "../components/renderer-statistics/RenderStatistics";
 import { WebsocketContext } from "../contexts/WebsocketContext";
 import { JobSettingsContext } from "../contexts/JobSettingsContext";
 import { message as messageApi } from "antd";
