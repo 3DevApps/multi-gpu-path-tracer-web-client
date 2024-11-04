@@ -91,7 +91,7 @@ export default function RenderStatisticsComponent({
       if (!categorizedEntries[category]) {
         categorizedEntries[category] = {};
       }
-      categorizedEntries[category][name] = {value, timestamp};
+      categorizedEntries[category][name] = { value, timestamp };
     }
   }, [renderStatistics]);
 
@@ -101,7 +101,7 @@ export default function RenderStatisticsComponent({
     if (!categorizedEntries["FPS"]) {
       categorizedEntries["FPS"] = {};
     }
-    categorizedEntries["FPS"]["FPS"] = {fps, timestamp};
+    categorizedEntries["FPS"]["FPS"] = { value: fps, timestamp };
   }, [fps]);
 
   return (
