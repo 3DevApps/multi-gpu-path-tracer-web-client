@@ -4,7 +4,6 @@ import React, {
   MouseEventHandler,
   useRef,
   useContext,
-  useState,
 } from "react";
 import "./RenderStream.css";
 import { useWebSocketConnection } from "../../hooks/useWebSocketConnection";

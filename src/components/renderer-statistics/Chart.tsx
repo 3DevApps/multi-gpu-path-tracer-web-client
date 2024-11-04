@@ -18,11 +18,6 @@ export default function ChartComponent({ data, ylabel }: any) {
     if (!ref.current) {
       return;
     }
-    const getRandomInt = (min: number, max: number) => {
-      min = Math.ceil(min);
-      max = Math.floor(max);
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    };
     // @ts-ignore
     const ctx = ref.current.getContext("2d");
     if (!ctx) {
@@ -54,10 +49,17 @@ export default function ChartComponent({ data, ylabel }: any) {
               delay: 2000,
               onRefresh: function (chart: any) {
                 const now = Date.now();
-                chart.data.datasets.forEach((dataset: any, index: number) => {
+                chart.data.datasets.forEach((dataset: any) => {
+                  if (!data[dataset.label] || !data[dataset.label].timestamp) {
+                    return;
+                  }
+                  const entry =
+                    Date.now() - data[dataset.label].timestamp < 3000
+                      ? data[dataset.label].data || dataset.data.at(-1)?.y
+                      : 0;
                   dataset.data.push({
                     x: now,
-                    y: data[dataset.label] || dataset.data.at(-1)?.y || 0,
+                    y: entry,
                   });
                   data[dataset.label] = undefined;
                 });

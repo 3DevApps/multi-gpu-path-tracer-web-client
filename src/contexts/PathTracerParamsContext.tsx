@@ -1,4 +1,4 @@
-import { createContext, useMemo, useState } from "react";
+import { createContext, useState } from "react";
 import config from "../config/config";
 
 type PathTracerParamsContextType = {

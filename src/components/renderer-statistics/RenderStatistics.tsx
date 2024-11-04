@@ -80,6 +80,7 @@ export default function RenderStatisticsComponent({
     }
 
     const entries = renderStatistics[0].split("|");
+    const timestamp = Date.now();
     for (let i = 0; i < entries.length; i += 3) {
       const category = entries[i];
       const name = entries[i + 1];
@@ -90,16 +91,17 @@ export default function RenderStatisticsComponent({
       if (!categorizedEntries[category]) {
         categorizedEntries[category] = {};
       }
-      categorizedEntries[category][name] = value;
+      categorizedEntries[category][name] = {value, timestamp};
     }
   }, [renderStatistics]);
 
   const { fps } = useContext(StatisticsContext);
   useEffect(() => {
+    const timestamp = Date.now();
     if (!categorizedEntries["FPS"]) {
       categorizedEntries["FPS"] = {};
     }
-    categorizedEntries["FPS"]["FPS"] = fps;
+    categorizedEntries["FPS"]["FPS"] = {fps, timestamp};
   }, [fps]);
 
   return (
