@@ -107,7 +107,7 @@ export default function PathTracerSettings() {
       name: "file",
       action: `${config.HTTP_SERVER_URL}/upload?jobId=${jobId}`,
       multiple: true,
-      accept: ".obj,.mtl",
+      accept: ".glb",
       onChange(info) {
         if (info.file.status === "done") {
           setSceneBeingLoaded(false);

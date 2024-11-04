@@ -8,6 +8,7 @@ import { useHandleWebSocketMessages } from "./hooks/useHandleWebSocketMessages";
 import { WebsocketContextProvider } from "./contexts/WebsocketContext";
 import { JobSettingsContextProvider } from "./contexts/JobSettingsContext";
 import { PathTracerParamsContextProvider } from "./contexts/PathTracerParamsContext";
+import { StatisticsContextProvider } from "./contexts/StatisticsContext";
 
 function App() {
   const { renderStatistics } = useHandleWebSocketMessages();
@@ -29,7 +30,9 @@ export default function AppWrapper() {
     <WebsocketContextProvider>
       <JobSettingsContextProvider>
         <PathTracerParamsContextProvider>
-          <App />
+          <StatisticsContextProvider>
+            <App />
+          </StatisticsContextProvider>
         </PathTracerParamsContextProvider>
       </JobSettingsContextProvider>
     </WebsocketContextProvider>

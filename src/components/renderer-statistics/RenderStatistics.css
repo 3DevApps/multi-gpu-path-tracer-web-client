@@ -24,12 +24,11 @@ aside.render-statistics {
 .scrollable-content {
   width: 100%;
   overflow-y: auto;
-  padding: 1rem;
   display: flex;
-  flex-grow: 1;
-  flex-direction: column;
-  align-items: center;
   flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
 }
 
 .toggle-button {

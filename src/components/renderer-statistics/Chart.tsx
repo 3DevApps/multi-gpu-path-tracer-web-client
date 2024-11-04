@@ -1,6 +1,16 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
-export default function ChartComponent() {
+// Function to generate random colors
+function getRandomColor() {
+  var letters = "0123456789ABCDEF";
+  var color = "#";
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+export default function ChartComponent({ data, ylabel }: any) {
   const ref = useRef(null);
   const chartRef = useRef(null);
 
@@ -18,16 +28,22 @@ export default function ChartComponent() {
     if (!ctx) {
       return;
     }
+
+    const datasets = Object.keys(data).map((key, index) => {
+      const color = getRandomColor();
+      return {
+        label: key,
+        cubicInterpolationMode: "monotone",
+        backgroundColor: color,
+        borderColor: color, // Use the same color for border
+      };
+    });
+
     // @ts-ignore
     chartRef.current = new Chart(ctx, {
       type: "line",
       data: {
-        datasets: [
-          {
-            label: "Real-Time Data",
-            cubicInterpolationMode: "monotone",
-          },
-        ],
+        datasets,
       },
       options: {
         scales: {
@@ -37,23 +53,33 @@ export default function ChartComponent() {
             realtime: {
               delay: 2000,
               onRefresh: function (chart: any) {
-                chart.data.datasets.forEach(function (dataset: any) {
+                const now = Date.now();
+                chart.data.datasets.forEach((dataset: any, index: number) => {
                   dataset.data.push({
-                    x: Date.now(),
-                    y: getRandomInt(0, 100),
+                    x: now,
+                    y: data[dataset.label] || dataset.data.at(-1)?.y || 0,
                   });
+                  data[dataset.label] = undefined;
                 });
               },
             },
           },
           y: {
             beginAtZero: true,
+            title: {
+              display: true,
+              text: ylabel,
+            },
           },
         },
         plugins: {
           // @ts-ignore
           streaming: {
             frameRate: 30, // Refresh 30 times per second
+          },
+          legend: {
+            display: true,
+            position: "bottom",
           },
         },
       },
@@ -62,7 +88,7 @@ export default function ChartComponent() {
 
   return (
     <div>
-      <canvas ref={ref} id="myChart" width="400" height="400"></canvas>
+      <canvas ref={ref} width="400" height="300"></canvas>
     </div>
   );
 }

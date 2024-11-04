@@ -4,12 +4,14 @@ import React, {
   MouseEventHandler,
   useRef,
   useContext,
+  useState,
 } from "react";
 import "./RenderStream.css";
 import { useWebSocketConnection } from "../../hooks/useWebSocketConnection";
 import { useMouseHandler } from "../../hooks/useMouseHandler";
 import H264Decoder from "../../utils/H264Decoder";
 import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext";
+import { StatisticsContext } from "../../contexts/StatisticsContext";
 
 const MIN_SPEED = 5;
 const MAX_SPEED = 50;
@@ -106,12 +108,24 @@ function useFrameHandler(
   renderData: Blob | null
 ) {
   const { width, height } = useContext(PathTracerParamsContext);
+  const { setFps } = useContext(StatisticsContext);
+  const frames = useRef<number[]>([]);
+
   const frameHandler = useCallback(
     (frame: VideoFrame) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       ctx!.drawImage(frame, 0, 0);
+
+      const now = performance.now();
+      const framesRef = frames.current;
+      framesRef.push(now);
+      while (framesRef.length > 0 && framesRef[0] < now - 1000) {
+        framesRef.shift();
+      }
+
+      setFps(framesRef.length);
     },
     [canvasRef]
   );
@@ -126,15 +140,11 @@ function useFrameHandler(
 
   useEffect(() => {
     const fn = async () => {
-      if (!renderData) {
-        return;
-      }
-
+      if (!renderData) return;
       const arrayBuffer = await renderData.arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
       await decoder.current?.decode(uint8Array);
     };
-
     fn();
   }, [renderData]);
 }

@@ -1,14 +1,17 @@
 import React, {
   MouseEventHandler,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import "./RenderStatistics.css";
 import { LeftOutlined } from "@ant-design/icons";
 import { useMouseHandler } from "../../hooks/useMouseHandler";
 import Chart from "./Chart";
+import { StatisticsContext } from "../../contexts/StatisticsContext";
 
 export type RenderStatistics = string[];
 
@@ -20,8 +23,8 @@ export default function RenderStatisticsComponent({
   renderStatistics,
 }: RenderStatisticsProps) {
   const [asideStyle, setAsideStyle] = useState({
-    width: 350,
-    right: -350,
+    width: 450,
+    right: -450,
     transition: "0s",
   });
   const closeButtonStyle = useMemo(
@@ -34,8 +37,8 @@ export default function RenderStatisticsComponent({
 
   const toggleAside = useCallback(() => {
     setAsideStyle((prev) => ({
-      right: prev.right === 0 ? -350 : 0,
-      width: 350,
+      right: prev.right === 0 ? -450 : 0,
+      width: 450,
       transition: "0.3s",
     }));
     setTimeout(() => {
@@ -50,7 +53,7 @@ export default function RenderStatisticsComponent({
     e.preventDefault();
     const { clientX } = e;
     const newWidth = window.innerWidth - clientX;
-    if (newWidth < 350) {
+    if (newWidth < 450) {
       return;
     }
     setAsideStyle((prev) => ({
@@ -70,39 +73,47 @@ export default function RenderStatisticsComponent({
     };
   }, [handleMouseMove]);
 
-  const resolvedRenderStatistics = useMemo(() => {
-    if (!renderStatistics.length) return null;
+  const categorizedEntries: any = useRef({}).current;
+  useEffect(() => {
+    if (!renderStatistics.length) {
+      return;
+    }
 
-    const categories = renderStatistics[0].split("|");
-    const values = renderStatistics.slice(1).map((value) => value.split("|"));
-
-    return values.map((value, index) => {
-      return (
-        <div key={index} className="render-statistics-category">
-          <h3>GPU #{value[0]}</h3>
-          <ul>
-            {value.slice(1).map((item, index) => (
-              <li key={index}>
-                <b>{categories[index + 1]}</b>: {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      );
-    });
+    const entries = renderStatistics[0].split("|");
+    for (let i = 0; i < entries.length; i += 3) {
+      const category = entries[i];
+      const name = entries[i + 1];
+      const value = entries[i + 2];
+      if (!category || !name || !value) {
+        continue;
+      }
+      if (!categorizedEntries[category]) {
+        categorizedEntries[category] = {};
+      }
+      categorizedEntries[category][name] = value;
+    }
   }, [renderStatistics]);
+
+  const { fps } = useContext(StatisticsContext);
+  useEffect(() => {
+    if (!categorizedEntries["FPS"]) {
+      categorizedEntries["FPS"] = {};
+    }
+    categorizedEntries["FPS"]["FPS"] = fps;
+  }, [fps]);
 
   return (
     <aside className="render-statistics" style={asideStyle}>
       <div className="resize-section" onMouseDown={handleMouseDown} />
+      <h2 className="header">Render statistics</h2>
       <div className="scrollable-content">
-        <h2 className="header">Render statistics</h2>
-        <Chart />
-        {resolvedRenderStatistics ? (
-          resolvedRenderStatistics
-        ) : (
-          <p>No statistics available</p>
-        )}
+        {Object.keys(categorizedEntries).map((category, index) => (
+          <Chart
+            key={index}
+            data={categorizedEntries[category]}
+            ylabel={category}
+          />
+        ))}
         <div className="toggle-button close-button" onClick={toggleAside}>
           <LeftOutlined
             className="close-button-icon"
