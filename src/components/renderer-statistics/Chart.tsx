@@ -54,7 +54,7 @@ export default function ChartComponent({ data, ylabel }: any) {
                     return;
                   }
                   const entry =
-                    now - data[dataset.label].timestamp < 3000
+                    now - data[dataset.label].timestamp < 40000
                       ? data[dataset.label].value || dataset.data.at(-1)?.y
                       : 0;
                   dataset.data.push({
