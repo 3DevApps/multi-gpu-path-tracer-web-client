@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { InputNumber, Flex, Space } from "antd";
 import { LockOutlined, UnlockOutlined } from "@ant-design/icons";
 import "./ImageResolutionInput.css";

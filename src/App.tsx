@@ -1,4 +1,3 @@
-import React from "react";
 import "./App.css";
 import Header from "./components/header/Header";
 import PathTracerSettings from "./components/path-tracer-settings/PathTracerSettings";

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import "./Header.css";
 import { GithubOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import { Modal } from "antd";

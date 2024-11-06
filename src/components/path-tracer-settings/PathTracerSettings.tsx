@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useContext,
   useEffect,
@@ -123,7 +123,7 @@ export default function PathTracerSettings() {
           ]);
         }
       },
-      beforeUpload: (file, fileList) => {
+      beforeUpload: (_file, fileList) => {
         filesToUpload.current = fileList.map((file) => file.name);
         setSceneBeingLoaded(true);
         return true;

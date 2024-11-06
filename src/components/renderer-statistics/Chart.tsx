@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 // Function to generate random colors
 function getRandomColor() {
@@ -24,7 +24,7 @@ export default function ChartComponent({ data, ylabel }: any) {
       return;
     }
 
-    const datasets = Object.keys(data).map((key, index) => {
+    const datasets = Object.keys(data).map((key) => {
       const color = getRandomColor();
       return {
         label: key,
