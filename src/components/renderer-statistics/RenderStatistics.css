@@ -75,3 +75,12 @@ h2.header {
   cursor: ew-resize;
   transition: 0.3s;
 }
+
+.recording-button {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  color: #495057;
+  cursor: pointer;
+  transition: 0.3s;
+}

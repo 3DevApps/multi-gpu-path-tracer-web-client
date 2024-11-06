@@ -8,10 +8,11 @@ import {
   useState,
 } from "react";
 import "./RenderStatistics.css";
-import { LeftOutlined } from "@ant-design/icons";
+import { DatabaseOutlined, LeftOutlined } from "@ant-design/icons";
 import { useMouseHandler } from "../../hooks/useMouseHandler";
 import Chart from "./Chart";
 import { StatisticsContext } from "../../contexts/StatisticsContext";
+import { Button, Tooltip } from "antd";
 
 export type RenderStatistics = string[];
 
@@ -104,6 +105,10 @@ export default function RenderStatisticsComponent({
     categorizedEntries["FPS"]["FPS"] = { value: fps, timestamp };
   }, [fps]);
 
+  const handleRecording = useCallback(() => {
+    console.log("Recording");
+  }, []);
+
   return (
     <aside className="render-statistics" style={asideStyle}>
       <div className="resize-section" onMouseDown={handleMouseDown} />
@@ -123,6 +128,15 @@ export default function RenderStatisticsComponent({
           />
         </div>
       </div>
+      {/* // TODO: Change icon */}
+      <Tooltip title="Record statistics">
+        <Button
+          className="recording-button"
+          size="large"
+          icon={<DatabaseOutlined />}
+          onClick={handleRecording}
+        />
+      </Tooltip>
     </aside>
   );
 }

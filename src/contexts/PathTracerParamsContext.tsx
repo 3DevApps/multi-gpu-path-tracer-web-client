@@ -2,6 +2,18 @@ import { createContext, useState } from "react";
 import config from "../config/config";
 
 type PathTracerParamsContextType = {
+  loadBalancingAlgorithm: string;
+  setLoadBalancingAlgorithm: (loadBalancingAlgorithm: string) => void;
+  loadBalancingTaskSizeX: number;
+  setLoadBalancingTaskSizeX: (loadBalancingTaskSize: number) => void;
+  prevLoadBalancingTaskSizeX: number;
+  setPrevLoadBalancingTaskSizeX: (prevLoadBalancingTaskSize: number) => void;
+  loadBalancingTaskSizeY: number;
+  setLoadBalancingTaskSizeY: (loadBalancingTaskSize: number) => void;
+  prevLoadBalancingTaskSizeY: number;
+  setPrevLoadBalancingTaskSizeY: (prevLoadBalancingTaskSize: number) => void;
+  showTaskGrid: boolean;
+  setShowTaskGrid: (showTaskDivision: boolean) => void;
   gpuNumber: number;
   setGpuNumber: (gpuNumber: number) => void;
   streamsPerGpu: number;
@@ -26,6 +38,16 @@ type PathTracerParamsContextType = {
   setThreadBlockSizeY: (threadBlockSizeY: number) => void;
   prevThreadBlockSizeY: number;
   setPrevThreadBlockSizeY: (prevThreadBlockSizeY: number) => void;
+  scenePositionX: number;
+  setScenePositionX: (scenePositionX: number) => void;
+  scenePositionY: number;
+  setScenePositionY: (scenePositionY: number) => void;
+  scenePositionZ: number;
+  setScenePositionZ: (scenePositionZ: number) => void;
+  pitch: number;
+  setPitch: (pitch: number) => void;
+  yaw: number;
+  setYaw: (yaw: number) => void;
 };
 
 export const PathTracerParamsContext = createContext(
@@ -63,10 +85,37 @@ export const PathTracerParamsContextProvider = ({ children }: any) => {
   const [prevThreadBlockSizeY, setPrevThreadBlockSizeY] = useState(
     config.DEFAULT_THREAD_BLOCK_SIZE_Y
   );
+  const [loadBalancingAlgorithm, setLoadBalancingAlgorithm] = useState(
+    config.DEFAULT_LOAD_BALANCING_ALGORITHM
+  );
+  const [loadBalancingTaskSizeX, setLoadBalancingTaskSizeX] = useState(1);
+  const [prevLoadBalancingTaskSizeX, setPrevLoadBalancingTaskSizeX] =
+    useState(1);
+  const [loadBalancingTaskSizeY, setLoadBalancingTaskSizeY] = useState(1);
+  const [prevLoadBalancingTaskSizeY, setPrevLoadBalancingTaskSizeY] =
+    useState(1);
+  const [showTaskGrid, setShowTaskGrid] = useState(false);
+  const [scenePositionX, setScenePositionX] = useState(0);
+  const [scenePositionY, setScenePositionY] = useState(0);
+  const [scenePositionZ, setScenePositionZ] = useState(0);
+  const [pitch, setPitch] = useState(0);
+  const [yaw, setYaw] = useState(0);
 
   return (
     <PathTracerParamsContext.Provider
       value={{
+        loadBalancingAlgorithm,
+        setLoadBalancingAlgorithm,
+        loadBalancingTaskSizeX,
+        setLoadBalancingTaskSizeX,
+        prevLoadBalancingTaskSizeX,
+        setPrevLoadBalancingTaskSizeX,
+        loadBalancingTaskSizeY,
+        setLoadBalancingTaskSizeY,
+        prevLoadBalancingTaskSizeY,
+        setPrevLoadBalancingTaskSizeY,
+        showTaskGrid,
+        setShowTaskGrid,
         gpuNumber,
         setGpuNumber,
         streamsPerGpu,
@@ -91,6 +140,16 @@ export const PathTracerParamsContextProvider = ({ children }: any) => {
         setThreadBlockSizeY,
         prevThreadBlockSizeY,
         setPrevThreadBlockSizeY,
+        scenePositionX,
+        setScenePositionX,
+        scenePositionY,
+        setScenePositionY,
+        scenePositionZ,
+        setScenePositionZ,
+        pitch,
+        setPitch,
+        yaw,
+        setYaw,
       }}
     >
       {children}

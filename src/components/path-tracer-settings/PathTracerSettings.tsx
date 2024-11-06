@@ -9,20 +9,28 @@ import {
 import "./PathTracerSettings.css";
 import {
   Button,
+  Checkbox,
   Divider,
+  Dropdown,
   Flex,
   Form,
   InputNumber,
   message,
   Select,
   Space,
+  Tooltip,
   Upload,
   UploadProps,
 } from "antd";
 import {
+  CaretDownOutlined,
   DownloadOutlined,
+  ExportOutlined,
+  ImportOutlined,
   LeftOutlined,
+  QuestionCircleOutlined,
   SettingOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import ImageResolutionInput from "./ImageResolutionInput";
 import config from "../../config/config";
@@ -30,7 +38,8 @@ import { useWebSocketConnection } from "../../hooks/useWebSocketConnection";
 import { JobSettingsContext } from "../../contexts/JobSettingsContext";
 import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext";
 import SettingChangeButton from "./SettingChangeButton";
-import ThreadBlockSizeInput from "./ThreadBlockSizeInput";
+import DoubleValueInput from "./DoubleValueInput";
+import TripleValueInput from "./TripleValueInput";
 
 function NumberInput({
   inputValue,
@@ -79,6 +88,7 @@ export default function PathTracerSettings() {
   const { sendMessage } = useWebSocketConnection();
   const { jobId, isAdmin } = useContext(JobSettingsContext);
   const [asideStyle, setAsideStyle] = useState({ left: 0 });
+  const pathTracerParams = useContext(PathTracerParamsContext);
   const closeButtonStyle = useMemo(
     () => ({
       transform: `rotate(${asideStyle.left === 0 ? 0 : 180}deg)`,
@@ -158,7 +168,21 @@ export default function PathTracerSettings() {
     [sendMessage]
   );
 
-  const pathTracerParams = useContext(PathTracerParamsContext);
+  const setLoadBalancingAlgorithm = useCallback(
+    (value: string) => {
+      updateRendererParameter("LOAD_BALANCING_ALGORITHM", value);
+      pathTracerParams.setLoadBalancingAlgorithm(value);
+    },
+    [updateRendererParameter, pathTracerParams]
+  );
+
+  const setShowTaskGrid = useCallback(() => {
+    pathTracerParams.setShowTaskGrid(!pathTracerParams.showTaskGrid);
+    updateRendererParameter(
+      "SHOW_TASK_GRID",
+      pathTracerParams.showTaskGrid.toString()
+    );
+  }, [updateRendererParameter, pathTracerParams]);
 
   return (
     <aside className="path-tracer-settings" style={asideStyle}>
@@ -167,19 +191,51 @@ export default function PathTracerSettings() {
           <h2>Path tracer settings</h2>
           <Form layout="vertical">
             <Form.Item
-              label="Scheduling algorithm"
+              label="Load balancing algorithm"
               tooltip="Algorithm used to schedule the rendering tasks."
             >
               <Select
-                placeholder="Select a scheduling algorithm"
-                options={config.SCHEDULING_ALGORITHMS}
-                defaultValue={config.DEFAULT_SCHEDULING_ALGORITHM}
-                onChange={(value) =>
-                  updateRendererParameter("SCHEDULING_ALGORITHM", value)
-                }
+                placeholder="Select a load balancing algorithm"
+                options={config.LOAD_BALANCING_ALGORITHMS}
+                defaultValue={config.DEFAULT_LOAD_BALANCING_ALGORITHM}
+                onChange={setLoadBalancingAlgorithm}
                 disabled={!isAdmin}
               />
             </Form.Item>
+            <Form.Item
+              label="Task size"
+              tooltip="The size of the task in load balancing algorithm"
+            >
+              <DoubleValueInput
+                firstValue={pathTracerParams.loadBalancingTaskSizeX}
+                prevFirstValue={pathTracerParams.prevLoadBalancingTaskSizeX}
+                setFirstValue={pathTracerParams.setLoadBalancingTaskSizeX}
+                setPrevFirstValue={
+                  pathTracerParams.setPrevLoadBalancingTaskSizeX
+                }
+                secondValue={pathTracerParams.loadBalancingTaskSizeY}
+                setSecondValue={pathTracerParams.setLoadBalancingTaskSizeY}
+                prevSecondValue={pathTracerParams.prevLoadBalancingTaskSizeY}
+                setPrevSecondValue={
+                  pathTracerParams.setPrevLoadBalancingTaskSizeY
+                }
+                updateRendererParameter={updateRendererParameter}
+                disabled={!isAdmin}
+              />
+            </Form.Item>
+            <Form.Item>
+              <Checkbox
+                onChange={setShowTaskGrid}
+                checked={pathTracerParams.showTaskGrid}
+                disabled={!isAdmin}
+              >
+                Show task grid
+              </Checkbox>
+              <Tooltip title="Show the grid of tasks in the scene">
+                <QuestionCircleOutlined style={{ color: "#858585" }} />
+              </Tooltip>
+            </Form.Item>
+            <Divider />
             <Flex align="space-between" justify="space-between">
               <Form.Item
                 label="GPU number"
@@ -236,11 +292,20 @@ export default function PathTracerSettings() {
               label="Thread block size"
               tooltip="The size of single Thread Block in the Grid."
             >
-              <ThreadBlockSizeInput
+              <DoubleValueInput
+                firstValue={pathTracerParams.threadBlockSizeX}
+                prevFirstValue={pathTracerParams.prevThreadBlockSizeX}
+                setFirstValue={pathTracerParams.setThreadBlockSizeX}
+                setPrevFirstValue={pathTracerParams.setPrevThreadBlockSizeX}
+                secondValue={pathTracerParams.threadBlockSizeY}
+                setSecondValue={pathTracerParams.setThreadBlockSizeY}
+                prevSecondValue={pathTracerParams.prevThreadBlockSizeY}
+                setPrevSecondValue={pathTracerParams.setPrevThreadBlockSizeY}
                 updateRendererParameter={updateRendererParameter}
                 disabled={!isAdmin}
               />
             </Form.Item>
+            <Divider />
             <Form.Item label="Image resolution (width x height)">
               <ImageResolutionInput
                 updateRendererParameter={updateRendererParameter}
@@ -248,6 +313,35 @@ export default function PathTracerSettings() {
               />
             </Form.Item>
             <Divider />
+            <Form.Item label="Camera position (x, y, z)">
+              <TripleValueInput
+                firstValue={pathTracerParams.scenePositionX}
+                setFirstValue={pathTracerParams.setScenePositionX}
+                secondValue={pathTracerParams.scenePositionY}
+                setSecondValue={pathTracerParams.setScenePositionY}
+                thirdValue={pathTracerParams.scenePositionZ}
+                setThirdValue={pathTracerParams.setScenePositionZ}
+                updateRendererParameter={updateRendererParameter}
+                disabled={!isAdmin}
+                separator=","
+                minValue={0}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Pitch and yaw (pitch, yaw)"
+              tooltip="Camera pitch and yaw"
+            >
+              <DoubleValueInput
+                firstValue={pathTracerParams.pitch}
+                setFirstValue={pathTracerParams.setPitch}
+                secondValue={pathTracerParams.yaw}
+                setSecondValue={pathTracerParams.setYaw}
+                updateRendererParameter={updateRendererParameter}
+                disabled={!isAdmin}
+                separator=","
+                minValue={0}
+              />
+            </Form.Item>
             <Form.Item>
               <Flex align="center" justify="center">
                 <Upload {...uploadProps}>
@@ -261,17 +355,56 @@ export default function PathTracerSettings() {
                 </Upload>
               </Flex>
             </Form.Item>
+            <Divider />
+            <Form.Item>
+              <Flex align="center" justify="center" gap="20px">
+                <Dropdown
+                  menu={{
+                    items: [
+                      {
+                        key: "1",
+                        icon: <ImportOutlined />,
+                        label: "Load .json settings",
+                      },
+                      {
+                        key: "2",
+                        label: "Save settings to .json",
+                        icon: <ExportOutlined />,
+                      },
+                    ],
+                  }}
+                  trigger={["click"]}
+                  disabled={!isAdmin}
+                >
+                  <Button className="primary-button">
+                    <Space>
+                      <UploadOutlined />
+                      Import / Export settings
+                      <CaretDownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </Flex>
+            </Form.Item>
+            <Flex align="center" justify="center" gap="20px">
+              <Form.Item>
+                <Button
+                  className="primary-button"
+                  type="primary"
+                  icon={<DownloadOutlined />}
+                  onClick={() =>
+                    sendMessage([
+                      "RENDERER_PARAMETER",
+                      "DOWNLOAD_SCENE_SNAPSHOT",
+                    ])
+                  }
+                  disabled={!isAdmin}
+                >
+                  Download current view
+                </Button>
+              </Form.Item>
+            </Flex>
           </Form>
-          <Button
-            className="download-button"
-            type="primary"
-            icon={<DownloadOutlined />}
-            onClick={() =>
-              sendMessage(["RENDERER_PARAMETER", "DOWNLOAD_SCENE_SNAPSHOT"])
-            }
-          >
-            Download current scene view
-          </Button>
         </Flex>
         <div className="toggle-button close-button" onClick={toggleAside}>
           <LeftOutlined

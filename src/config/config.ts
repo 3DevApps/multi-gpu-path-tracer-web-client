@@ -16,12 +16,12 @@ const config = {
   DEFAULT_RECURSION_DEPTH: 3,
   DEFAULT_THREAD_BLOCK_SIZE_X: 8,
   DEFAULT_THREAD_BLOCK_SIZE_Y: 8,
-  SCHEDULING_ALGORITHMS: [
+  LOAD_BALANCING_ALGORITHMS: [
     { value: "FST", label: "Fixed size tasks" },
     { value: "DTFL", label: "Dynamic tasks with fixed layout" },
     { value: "DT", label: "Dynamic layout tasks" },
   ],
-  DEFAULT_SCHEDULING_ALGORITHM: "FST",
+  DEFAULT_LOAD_BALANCING_ALGORITHM: "FST",
   SERVER_URL:
     import.meta.env.REACT_APP_ENVIRONMENT === "development"
       ? "localhost:8080"

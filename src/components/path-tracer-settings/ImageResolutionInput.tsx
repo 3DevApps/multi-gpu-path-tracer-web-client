@@ -44,7 +44,7 @@ export default function ImageResolutionInput({
   };
 
   return (
-    <Flex align="space-around" justify="space-around">
+    <Flex align="space-around" justify="center" gap="15px">
       <Space direction="vertical" align="center">
         <Flex align="center" gap="5px">
           <InputNumber

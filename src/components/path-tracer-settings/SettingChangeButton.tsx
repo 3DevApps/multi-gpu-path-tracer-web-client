@@ -1,5 +1,6 @@
 import { Button } from "antd";
 import { useEffect, useState } from "react";
+import "./SettingChangeButton.css";
 
 const BUTTON_RED = "#ff0021";
 
@@ -19,6 +20,9 @@ export default function SettingChangeButton({
   }>({ backgroundColor: undefined });
 
   useEffect(() => {
+    if (prevValue === undefined) {
+      return;
+    }
     setStyle({
       backgroundColor: value === prevValue ? undefined : BUTTON_RED,
     });
