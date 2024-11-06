@@ -1,7 +1,7 @@
 const wsProtocol =
-  process.env.REACT_APP_ENVIRONMENT === "development" ? "ws" : "wss";
+  import.meta.env.REACT_APP_ENVIRONMENT === "development" ? "ws" : "wss";
 const httpProtocol =
-  process.env.REACT_APP_ENVIRONMENT === "development" ? "http" : "https";
+  import.meta.env.REACT_APP_ENVIRONMENT === "development" ? "http" : "https";
 
 const config = {
   WS_SERVER_URL: "",
@@ -17,13 +17,13 @@ const config = {
   DEFAULT_THREAD_BLOCK_SIZE_X: 8,
   DEFAULT_THREAD_BLOCK_SIZE_Y: 8,
   SCHEDULING_ALGORITHMS: [
-    { value: "FCFS", label: "First-Come, First-Served" },
-    { value: "SJN", label: "Shortest-Job-Next" },
-    { value: "PS", label: "Priority Scheduling" },
+    { value: "FST", label: "Fixed size tasks" },
+    { value: "DTFL", label: "Dynamic tasks with fixed layout" },
+    { value: "DT", label: "Dynamic layout tasks" },
   ],
-  DEFAULT_SCHEDULING_ALGORITHM: "FCFS",
+  DEFAULT_SCHEDULING_ALGORITHM: "FST",
   SERVER_URL:
-    process.env.REACT_APP_ENVIRONMENT === "development"
+    import.meta.env.REACT_APP_ENVIRONMENT === "development"
       ? "localhost:8080"
       : "pathtracing-relay-server.klatka.it",
 };
