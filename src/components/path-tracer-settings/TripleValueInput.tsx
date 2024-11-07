@@ -1,5 +1,5 @@
 import { Flex, InputNumber } from "antd";
-import React from "react";
+import React, { useEffect } from "react";
 import SettingChangeButton from "./SettingChangeButton";
 import "./TripleValueInput.css";
 
@@ -18,6 +18,7 @@ export default function TripleValueInput({
   setPrevThirdValue,
   updateRendererParameter,
   disabled,
+  keyName,
   separator = "X",
   minValue = 1,
 }: {
@@ -35,8 +36,9 @@ export default function TripleValueInput({
   setPrevThirdValue?: (value: number) => void;
   updateRendererParameter: (key: string, value: string) => void;
   disabled: boolean;
+  keyName: string;
   separator?: string;
-  minValue?: number;
+  minValue?: number | null;
 }) {
   const [internalFirstValue, setIntarnalFirstValue] =
     React.useState(firstValue);
@@ -45,11 +47,17 @@ export default function TripleValueInput({
   const [internalThirdValue, setInternalThirdValue] =
     React.useState(thirdValue);
 
+  useEffect(() => {
+    setIntarnalFirstValue(firstValue);
+    setInternalSecondValue(secondValue);
+    setInternalThirdValue(thirdValue);
+  }, [firstValue, secondValue, thirdValue]);
+
   return (
     <Flex align="space-around" justify="center" gap="15px">
       <Flex align="center" gap="5px">
         <InputNumber
-          min={minValue}
+          min={minValue === null ? undefined : minValue}
           className="triple-value-input"
           onChange={(value) => value && setIntarnalFirstValue(value)}
           value={internalFirstValue}
@@ -57,7 +65,7 @@ export default function TripleValueInput({
         />
         <b>{separator}</b>
         <InputNumber
-          min={minValue}
+          min={minValue === null ? undefined : minValue}
           className="triple-value-input"
           onChange={(value) => value && setInternalSecondValue(value)}
           value={internalSecondValue}
@@ -65,7 +73,7 @@ export default function TripleValueInput({
         />
         <b>{separator}</b>
         <InputNumber
-          min={minValue}
+          min={minValue === null ? undefined : minValue}
           className="triple-value-input"
           onChange={(value) => value && setInternalThirdValue(value)}
           value={internalThirdValue}
@@ -82,7 +90,7 @@ export default function TripleValueInput({
           }
           onClick={() => {
             updateRendererParameter(
-              "THREAD_BLOCK_SIZE",
+              keyName,
               `${internalFirstValue}#${internalSecondValue}#${internalThirdValue}`
             );
             setPrevFirstValue?.(internalFirstValue);

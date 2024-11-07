@@ -1,5 +1,5 @@
 import { Flex, InputNumber } from "antd";
-import React from "react";
+import React, { useEffect } from "react";
 import SettingChangeButton from "./SettingChangeButton";
 
 export default function DoubleValueInput({
@@ -13,6 +13,7 @@ export default function DoubleValueInput({
   setPrevSecondValue,
   updateRendererParameter,
   disabled,
+  keyName,
   separator = "X",
   minValue = 1,
 }: {
@@ -26,19 +27,25 @@ export default function DoubleValueInput({
   setPrevSecondValue?: (value: number) => void;
   updateRendererParameter: (key: string, value: string) => void;
   disabled: boolean;
+  keyName: string;
   separator?: string;
-  minValue?: number;
+  minValue?: number | null;
 }) {
   const [internalFirstValue, setIntarnalFirstValue] =
     React.useState(firstValue);
   const [internalSecondValue, setInternalSecondValue] =
     React.useState(secondValue);
 
+  useEffect(() => {
+    setIntarnalFirstValue(firstValue);
+    setInternalSecondValue(secondValue);
+  }, [firstValue, secondValue]);
+
   return (
     <Flex align="space-around" justify="center" gap="15px">
       <Flex align="center" gap="5px">
         <InputNumber
-          min={minValue}
+          min={minValue === null ? undefined : minValue}
           className="thread-block-size-input"
           onChange={(value) => value && setIntarnalFirstValue(value)}
           value={internalFirstValue}
@@ -46,7 +53,7 @@ export default function DoubleValueInput({
         />
         <b>{separator}</b>
         <InputNumber
-          min={minValue}
+          min={minValue === null ? undefined : minValue}
           className="thread-block-size-input"
           onChange={(value) => value && setInternalSecondValue(value)}
           value={internalSecondValue}
@@ -62,7 +69,7 @@ export default function DoubleValueInput({
         }
         onClick={() => {
           updateRendererParameter(
-            "THREAD_BLOCK_SIZE",
+            keyName,
             `${internalFirstValue}#${internalSecondValue}`
           );
           setPrevFirstValue?.(internalFirstValue);

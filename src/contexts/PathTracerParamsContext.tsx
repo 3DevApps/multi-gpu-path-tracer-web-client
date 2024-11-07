@@ -2,6 +2,8 @@ import { createContext, useState } from "react";
 import config from "../config/config";
 
 type PathTracerParamsContextType = {
+  exportStateToJSON: () => string;
+  importStateFromJSON: (json: string) => void;
   loadBalancingAlgorithm: string;
   setLoadBalancingAlgorithm: (loadBalancingAlgorithm: string) => void;
   loadBalancingTaskSizeX: number;
@@ -101,9 +103,60 @@ export const PathTracerParamsContextProvider = ({ children }: any) => {
   const [pitch, setPitch] = useState(0);
   const [yaw, setYaw] = useState(0);
 
+  const exportStateToJSON = () => {
+    return JSON.stringify({
+      gpuNumber,
+      streamsPerGpu,
+      samplesPerPixel,
+      recursionDepth,
+      width,
+      height,
+      threadBlockSizeX,
+      threadBlockSizeY,
+      loadBalancingAlgorithm,
+      loadBalancingTaskSizeX,
+      loadBalancingTaskSizeY,
+      showTaskGrid,
+      scenePositionX,
+      scenePositionY,
+      scenePositionZ,
+      pitch,
+      yaw,
+    });
+  };
+
+  const importStateFromJSON = (json: string) => {
+    const state = JSON.parse(json);
+    setGpuNumber(state.gpuNumber);
+    setStreamsPerGpu(state.streamsPerGpu);
+    setSamplesPerPixel(state.samplesPerPixel);
+    setRecursionDepth(state.recursionDepth);
+    setWidth(state.width);
+    setPrevWidth(state.width);
+    setHeight(state.height);
+    setPrevHeight(state.height);
+    setThreadBlockSizeX(state.threadBlockSizeX);
+    setPrevThreadBlockSizeX(state.threadBlockSizeX);
+    setThreadBlockSizeY(state.threadBlockSizeY);
+    setPrevThreadBlockSizeY(state.threadBlockSizeY);
+    setLoadBalancingAlgorithm(state.loadBalancingAlgorithm);
+    setLoadBalancingTaskSizeX(state.loadBalancingTaskSizeX);
+    setPrevLoadBalancingTaskSizeX(state.loadBalancingTaskSizeX);
+    setLoadBalancingTaskSizeY(state.loadBalancingTaskSizeY);
+    setPrevLoadBalancingTaskSizeY(state.loadBalancingTaskSizeY);
+    setShowTaskGrid(state.showTaskGrid);
+    setScenePositionX(state.scenePositionX);
+    setScenePositionY(state.scenePositionY);
+    setScenePositionZ(state.scenePositionZ);
+    setPitch(state.pitch);
+    setYaw(state.yaw);
+  };
+
   return (
     <PathTracerParamsContext.Provider
       value={{
+        exportStateToJSON,
+        importStateFromJSON,
         loadBalancingAlgorithm,
         setLoadBalancingAlgorithm,
         loadBalancingTaskSizeX,

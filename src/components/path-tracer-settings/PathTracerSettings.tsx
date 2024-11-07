@@ -59,6 +59,10 @@ function NumberInput({
   const [prevValue, setPrevValue] = useState(inputValue);
   const [value, setValue] = useState(inputValue);
 
+  useEffect(() => {
+    setValue(inputValue);
+  }, [inputValue]);
+
   return (
     <Space.Compact>
       <InputNumber
@@ -184,6 +188,37 @@ export default function PathTracerSettings() {
     );
   }, [updateRendererParameter, pathTracerParams]);
 
+  const loadSettingsFromJSON = useCallback(() => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const content = await file.text();
+      try {
+        pathTracerParams.importStateFromJSON(content);
+      } catch (err) {
+        console.error("Failed to parse settings file:", err);
+      }
+    };
+
+    input.click();
+  }, [pathTracerParams]);
+
+  const saveSettingsToJSON = useCallback(() => {
+    const json = pathTracerParams.exportStateToJSON();
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "settings.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [pathTracerParams]);
+
   return (
     <aside className="path-tracer-settings" style={asideStyle}>
       <div className="scrollable-content">
@@ -199,6 +234,7 @@ export default function PathTracerSettings() {
                 options={config.LOAD_BALANCING_ALGORITHMS}
                 defaultValue={config.DEFAULT_LOAD_BALANCING_ALGORITHM}
                 onChange={setLoadBalancingAlgorithm}
+                value={pathTracerParams.loadBalancingAlgorithm}
                 disabled={!isAdmin}
               />
             </Form.Item>
@@ -207,6 +243,7 @@ export default function PathTracerSettings() {
               tooltip="The size of the task in load balancing algorithm"
             >
               <DoubleValueInput
+                keyName="LOAD_BALANCING_TASK_SIZE"
                 firstValue={pathTracerParams.loadBalancingTaskSizeX}
                 prevFirstValue={pathTracerParams.prevLoadBalancingTaskSizeX}
                 setFirstValue={pathTracerParams.setLoadBalancingTaskSizeX}
@@ -293,6 +330,7 @@ export default function PathTracerSettings() {
               tooltip="The size of single Thread Block in the Grid."
             >
               <DoubleValueInput
+                keyName="THREAD_BLOCK_SIZE"
                 firstValue={pathTracerParams.threadBlockSizeX}
                 prevFirstValue={pathTracerParams.prevThreadBlockSizeX}
                 setFirstValue={pathTracerParams.setThreadBlockSizeX}
@@ -312,9 +350,9 @@ export default function PathTracerSettings() {
                 disabled={!isAdmin}
               />
             </Form.Item>
-            <Divider />
             <Form.Item label="Camera position (x, y, z)">
               <TripleValueInput
+                keyName="SCENE_POSITION"
                 firstValue={pathTracerParams.scenePositionX}
                 setFirstValue={pathTracerParams.setScenePositionX}
                 secondValue={pathTracerParams.scenePositionY}
@@ -324,14 +362,12 @@ export default function PathTracerSettings() {
                 updateRendererParameter={updateRendererParameter}
                 disabled={!isAdmin}
                 separator=","
-                minValue={0}
+                minValue={null}
               />
             </Form.Item>
-            <Form.Item
-              label="Pitch and yaw (pitch, yaw)"
-              tooltip="Camera pitch and yaw"
-            >
+            <Form.Item label="Pitch and yaw (pitch, yaw)">
               <DoubleValueInput
+                keyName="PITCH_YAW"
                 firstValue={pathTracerParams.pitch}
                 setFirstValue={pathTracerParams.setPitch}
                 secondValue={pathTracerParams.yaw}
@@ -339,7 +375,7 @@ export default function PathTracerSettings() {
                 updateRendererParameter={updateRendererParameter}
                 disabled={!isAdmin}
                 separator=","
-                minValue={0}
+                minValue={null}
               />
             </Form.Item>
             <Form.Item>
@@ -365,11 +401,13 @@ export default function PathTracerSettings() {
                         key: "1",
                         icon: <ImportOutlined />,
                         label: "Load .json settings",
+                        onClick: loadSettingsFromJSON,
                       },
                       {
                         key: "2",
                         label: "Save settings to .json",
                         icon: <ExportOutlined />,
+                        onClick: saveSettingsToJSON,
                       },
                     ],
                   }}
