@@ -116,6 +116,7 @@ export default function RenderStatisticsComponent({
       categorizedEntries["FPS"] = {};
     }
     categorizedEntries["FPS"]["FPS"] = { value: fps, timestamp };
+    storeDataPoint("FPS", "FPS", fps);
   }, [fps]);
 
   const { isAdmin } = useContext(JobSettingsContext);

@@ -1,6 +1,6 @@
 import { Flex, Modal, TreeSelect } from "antd";
 import { useCallback, useState } from "react";
-import Chart from "./Chart";
+import StaticChart from "./StaticChart";
 
 const treeData = [
   {
@@ -67,14 +67,14 @@ export default function ChartAnalysis({ isModalOpen, setIsModalOpen }: any) {
           onChange={onChange}
           treeData={treeData}
         />
-        <Chart
+        <StaticChart
           data={[
             {
               x: 123,
               y: 123,
             },
           ]}
-          ylabel={"dupa"}
+          ylabel={"test"}
         />
       </Flex>
     </Modal>

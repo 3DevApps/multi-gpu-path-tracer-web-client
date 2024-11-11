@@ -138,25 +138,37 @@ export default function ChartComponent({ data, ylabel }: any) {
                   key: "1",
                   label: "From 1 minute ago",
                   onClick: () =>
-                    downloadCSV(getFilteredData(1 * 60000), "stats_1min.csv"),
+                    downloadCSV(
+                      getFilteredData(1 * 60000, ylabel),
+                      "stats_1min.csv"
+                    ),
                 },
                 {
                   key: "2",
                   label: "From 5 minutes ago",
                   onClick: () =>
-                    downloadCSV(getFilteredData(5 * 60000), "stats_5min.csv"),
+                    downloadCSV(
+                      getFilteredData(5 * 60000, ylabel),
+                      "stats_5min.csv"
+                    ),
                 },
                 {
                   key: "3",
                   label: "From 10 minutes ago",
                   onClick: () =>
-                    downloadCSV(getFilteredData(10 * 60000), "stats_10min.csv"),
+                    downloadCSV(
+                      getFilteredData(10 * 60000, ylabel),
+                      "stats_10min.csv"
+                    ),
                 },
                 {
                   key: "4",
                   label: "From 15 minutes ago",
                   onClick: () =>
-                    downloadCSV(getFilteredData(15 * 60000), "stats_15min.csv"),
+                    downloadCSV(
+                      getFilteredData(15 * 60000, ylabel),
+                      "stats_15min.csv"
+                    ),
                 },
                 {
                   key: "5",
