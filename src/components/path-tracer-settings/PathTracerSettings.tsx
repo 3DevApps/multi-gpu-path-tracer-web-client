@@ -19,8 +19,6 @@ import {
   Select,
   Space,
   Tooltip,
-  Upload,
-  UploadProps,
 } from "antd";
 import {
   CaretDownOutlined,
@@ -93,6 +91,7 @@ export default function PathTracerSettings() {
   const { jobId, isAdmin } = useContext(JobSettingsContext);
   const [asideStyle, setAsideStyle] = useState({ left: 0 });
   const pathTracerParams = useContext(PathTracerParamsContext);
+  const [isUploading, setIsUploading] = useState(false);
   const closeButtonStyle = useMemo(
     () => ({
       transform: `rotate(${asideStyle.left === 0 ? 0 : 180}deg)`,
@@ -107,63 +106,50 @@ export default function PathTracerSettings() {
     }));
   }, []);
 
-  const [sceneBeingLoaded, setSceneBeingLoaded] = useState(false);
-  const filesToUpload = useRef<(string | boolean)[]>([]);
-  const [uploadedFiles, setUploadedFiles] = useState<
-    {
-      name: string;
-      success: boolean;
-    }[]
-  >([]);
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-  const uploadProps: UploadProps = useMemo(
-    () => ({
-      name: "file",
-      action: `${config.HTTP_SERVER_URL}/upload?jobId=${jobId}`,
-      multiple: true,
-      accept: ".glb",
-      onChange(info) {
-        if (info.file.status === "done") {
-          setSceneBeingLoaded(false);
-          setUploadedFiles((prev) => [
-            ...prev,
-            { name: info.file.name, success: true },
-          ]);
-        } else if (info.file.status === "error") {
-          setSceneBeingLoaded(false);
-          setUploadedFiles((prev) => [
-            ...prev,
-            { name: info.file.name, success: false },
-          ]);
+    setIsUploading(true);
+    const formData = new FormData();
+
+    // Append all files to same FormData
+    Array.from(files).forEach((file) => {
+      formData.append("files", file);
+    });
+
+    try {
+      const response = await fetch(
+        `${config.HTTP_SERVER_URL}/upload?jobId=${jobId}`,
+        {
+          method: "POST",
+          body: formData,
         }
-      },
-      beforeUpload: (_file, fileList) => {
-        filesToUpload.current = fileList.map((file) => file.name);
-        setSceneBeingLoaded(true);
-        return true;
-      },
-      showUploadList: false,
-    }),
-    [jobId, filesToUpload]
-  );
+      );
 
-  useEffect(() => {
-    if (
-      uploadedFiles.length !== filesToUpload.current.length ||
-      uploadedFiles.length === 0
-    ) {
-      return;
-    }
+      if (!response.ok) {
+        message.error("Upload failed - server error");
+        return;
+      }
 
-    if (uploadedFiles.every(({ success }) => success)) {
-      message.success(`Files uploaded successfully!`);
+      message.success("Upload successful!");
       sendMessage(["RENDERER_PARAMETER", "LOAD_UPLOADED_SCENE"]);
-    } else {
-      message.error(`File upload failed!`);
+    } catch (error) {
+      message.error("Upload failed - network error");
+      console.error(
+        "Failed files:",
+        Array.from(files).map((file) => ({
+          name: file.name,
+          success: false,
+        }))
+      );
+    } finally {
+      setIsUploading(false);
+      event.target.value = ""; // Reset input
     }
-
-    setUploadedFiles([]);
-  }, [filesToUpload, sendMessage, uploadedFiles]);
+  };
 
   const updateRendererParameter = useCallback(
     (parameterKey: string, value: string) => {
@@ -218,6 +204,13 @@ export default function PathTracerSettings() {
     a.click();
     URL.revokeObjectURL(url);
   }, [pathTracerParams]);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const triggerFileInput = (e: React.MouseEvent) => {
+    e.preventDefault();
+    fileInputRef.current?.click();
+  };
 
   return (
     <aside className="path-tracer-settings" style={asideStyle}>
@@ -380,15 +373,21 @@ export default function PathTracerSettings() {
             </Form.Item>
             <Form.Item>
               <Flex align="center" justify="center">
-                <Upload {...uploadProps}>
-                  <Button
-                    loading={sceneBeingLoaded}
-                    icon={<SettingOutlined />}
-                    disabled={!isAdmin}
-                  >
-                    Load scene
-                  </Button>
-                </Upload>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  onChange={handleFileUpload}
+                  style={{ display: "none" }}
+                />
+                <Button
+                  onClick={triggerFileInput}
+                  loading={isUploading}
+                  icon={<SettingOutlined />}
+                  disabled={!isAdmin}
+                >
+                  Load scene
+                </Button>
               </Flex>
             </Form.Item>
             <Divider />

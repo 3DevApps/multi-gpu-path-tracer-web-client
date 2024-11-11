@@ -41,7 +41,7 @@ export default function ChartAnalysis({ isModalOpen, setIsModalOpen }: any) {
   }, []);
 
   const [value, setValue] = useState(undefined);
-  const onChange = useCallback((value) => {
+  const onChange = useCallback((value: any) => {
     setValue(value);
   }, []);
 
