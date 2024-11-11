@@ -153,6 +153,11 @@ export default function PathTracerSettings() {
 
   const updateRendererParameter = useCallback(
     (parameterKey: string, value: string) => {
+      // TODO: improve this
+      if (parameterKey === "PITCH_YAW" || parameterKey === "SCENE_POSITION") {
+        sendMessage(["CAMERA_EVENT", parameterKey, value]);
+        return;
+      }
       sendMessage(["RENDERER_PARAMETER", parameterKey, value]);
     },
     [sendMessage]
