@@ -1,7 +1,5 @@
-const wsProtocol =
-  import.meta.env.REACT_APP_ENVIRONMENT === "development" ? "ws" : "wss";
-const httpProtocol =
-  import.meta.env.REACT_APP_ENVIRONMENT === "development" ? "http" : "https";
+const wsProtocol = import.meta.env.VITE_DEV_MODE ? "ws" : "wss";
+const httpProtocol = import.meta.env.VITE_DEV_MODE ? "http" : "https";
 
 const config = {
   WS_SERVER_URL: "",
@@ -22,10 +20,9 @@ const config = {
     { value: "DT", label: "Dynamic layout tasks" },
   ],
   DEFAULT_LOAD_BALANCING_ALGORITHM: "FST",
-  SERVER_URL:
-    import.meta.env.REACT_APP_ENVIRONMENT === "development"
-      ? "localhost:8080"
-      : "pathtracing-relay-server.klatka.it",
+  SERVER_URL: import.meta.env.VITE_DEV_MODE
+    ? "localhost:8080"
+    : "pathtracing-relay-server.klatka.it",
 };
 
 config.WS_SERVER_URL = `${wsProtocol}://${config.SERVER_URL}`;

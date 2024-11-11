@@ -8,11 +8,18 @@ import {
   useState,
 } from "react";
 import "./RenderStatistics.css";
-import { DatabaseOutlined, LeftOutlined } from "@ant-design/icons";
+import {
+  CaretDownOutlined,
+  LeftOutlined,
+  SaveOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { useMouseHandler } from "../../hooks/useMouseHandler";
 import Chart from "./Chart";
 import { StatisticsContext } from "../../contexts/StatisticsContext";
-import { Button, Tooltip } from "antd";
+import { Button, Dropdown, Flex, Space } from "antd";
+import { JobSettingsContext } from "../../contexts/JobSettingsContext";
+import ChartAnalysis from "./ChartAnalysis";
 
 export type RenderStatistics = string[];
 
@@ -105,14 +112,62 @@ export default function RenderStatisticsComponent({
     categorizedEntries["FPS"]["FPS"] = { value: fps, timestamp };
   }, [fps]);
 
-  const handleRecording = useCallback(() => {
-    console.log("Recording");
-  }, []);
+  const { isAdmin } = useContext(JobSettingsContext);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <aside className="render-statistics" style={asideStyle}>
       <div className="resize-section" onMouseDown={handleMouseDown} />
       <h2 className="header">Render statistics</h2>
+      <Flex>
+        <Button
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
+        >
+          <Space>
+            <SearchOutlined />
+            Analyze data
+          </Space>
+        </Button>
+        <Dropdown
+          menu={{
+            items: [
+              {
+                key: "1",
+                label: "From 1 minute ago",
+              },
+              {
+                key: "2",
+                label: "From 5 minutes ago",
+              },
+              {
+                key: "3",
+                label: "From 10 minutes ago",
+              },
+              {
+                key: "4",
+                label: "From 15 minutes ago",
+              },
+              {
+                key: "5",
+                label: "All time",
+              },
+            ],
+          }}
+          trigger={["click"]}
+          disabled={!isAdmin}
+        >
+          <Button>
+            <Space>
+              <SaveOutlined />
+              Save data
+              <CaretDownOutlined />
+            </Space>
+          </Button>
+        </Dropdown>
+      </Flex>
       <div className="scrollable-content">
         {Object.keys(categorizedEntries).map((category, index) => (
           <Chart
@@ -128,15 +183,10 @@ export default function RenderStatisticsComponent({
           />
         </div>
       </div>
-      {/* // TODO: Change icon */}
-      <Tooltip title="Record statistics">
-        <Button
-          className="recording-button"
-          size="large"
-          icon={<DatabaseOutlined />}
-          onClick={handleRecording}
-        />
-      </Tooltip>
+      <ChartAnalysis
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+      />
     </aside>
   );
 }

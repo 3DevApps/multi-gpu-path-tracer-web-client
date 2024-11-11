@@ -34,28 +34,28 @@ function useKeyPressHandler() {
       increaseSpeed();
       switch (key) {
         case "W":
-          sendMessage(["KEYBOARD_EVENT", "FORWARD", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "FORWARD", moveSpeed.current]);
           break;
         case "A":
-          sendMessage(["KEYBOARD_EVENT", "LEFT", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "LEFT", moveSpeed.current]);
           break;
         case "S":
-          sendMessage(["KEYBOARD_EVENT", "BACKWARD", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "BACKWARD", moveSpeed.current]);
           break;
         case "D":
-          sendMessage(["KEYBOARD_EVENT", "RIGHT", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "RIGHT", moveSpeed.current]);
           break;
         case "Q":
-          sendMessage(["KEYBOARD_EVENT", "DOWN", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "DOWN", moveSpeed.current]);
           break;
         case "E":
-          sendMessage(["KEYBOARD_EVENT", "UP", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "UP", moveSpeed.current]);
           break;
         case "[":
-          event.ctrlKey && sendMessage(["KEYBOARD_EVENT", "FOV-"]);
+          event.ctrlKey && sendMessage(["CAMERA_EVENT", "FOV-"]);
           break;
         case "]":
-          event.ctrlKey && sendMessage(["KEYBOARD_EVENT", "FOV+"]);
+          event.ctrlKey && sendMessage(["CAMERA_EVENT", "FOV+"]);
           break;
         default:
           break;

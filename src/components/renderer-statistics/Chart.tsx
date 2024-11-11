@@ -1,14 +1,10 @@
-import { useEffect, useRef } from "react";
+import { RedoOutlined } from "@ant-design/icons";
+import { Button, Tooltip } from "antd";
+import { useCallback, useEffect, useRef } from "react";
+import "./Chart.css";
 
-// Function to generate random colors
-function getRandomColor() {
-  var letters = "0123456789ABCDEF";
-  var color = "#";
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
+// @ts-ignore
+const autocolors = window["chartjs-plugin-autocolors"];
 
 export default function ChartComponent({ data, ylabel }: any) {
   const ref = useRef(null);
@@ -25,12 +21,9 @@ export default function ChartComponent({ data, ylabel }: any) {
     }
 
     const datasets = Object.keys(data).map((key) => {
-      const color = getRandomColor();
       return {
         label: key,
         cubicInterpolationMode: "monotone",
-        backgroundColor: color,
-        borderColor: color, // Use the same color for border
       };
     });
 
@@ -83,14 +76,44 @@ export default function ChartComponent({ data, ylabel }: any) {
             display: true,
             position: "bottom",
           },
+          zoom: {
+            zoom: {
+              wheel: {
+                enabled: true,
+              },
+              pinch: {
+                enabled: true,
+              },
+              mode: "x",
+            },
+          },
         },
       },
+      plugins: [autocolors],
     });
+
+    return () => {
+      // @ts-ignore
+      chartRef.current?.destroy();
+    };
+  }, []);
+
+  const resetZoom = useCallback(() => {
+    if (!chartRef.current) {
+      return;
+    }
+    // @ts-ignore
+    chartRef.current.resetZoom();
   }, []);
 
   return (
-    <div>
+    <div className="chart-wrapper">
       <canvas ref={ref} width="400" height="300"></canvas>
+      <div className="button-wrapper">
+        <Tooltip title="Reset zoom">
+          <Button size="middle" icon={<RedoOutlined />} onClick={resetZoom} />
+        </Tooltip>
+      </div>
     </div>
   );
 }

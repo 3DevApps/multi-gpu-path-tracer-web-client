@@ -74,7 +74,7 @@ export default function Header() {
               view.
             </li>
           </ul>
-        </ol>{" "}
+        </ol>
         <br />
         <p>Authors: Patryk Klatka, Wojciech Łoboda, Bartłomiej Tempka</p>
       </Modal>
