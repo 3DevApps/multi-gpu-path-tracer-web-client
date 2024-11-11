@@ -20,6 +20,11 @@ import { StatisticsContext } from "../../contexts/StatisticsContext";
 import { Button, Dropdown, Flex, Space } from "antd";
 import { JobSettingsContext } from "../../contexts/JobSettingsContext";
 import ChartAnalysis from "./ChartAnalysis";
+import {
+  downloadCSV,
+  getFilteredData,
+  storeDataPoint,
+} from "./statisticsDataUtils";
 
 export type RenderStatistics = string[];
 
@@ -100,6 +105,7 @@ export default function RenderStatisticsComponent({
         categorizedEntries[category] = {};
       }
       categorizedEntries[category][name] = { value, timestamp };
+      storeDataPoint(category, name, value);
     }
   }, [renderStatistics]);
 
@@ -120,7 +126,7 @@ export default function RenderStatisticsComponent({
     <aside className="render-statistics" style={asideStyle}>
       <div className="resize-section" onMouseDown={handleMouseDown} />
       <h2 className="header">Render statistics</h2>
-      <Flex>
+      <Flex gap="10px">
         <Button
           onClick={() => {
             setIsModalOpen(true);
@@ -137,22 +143,35 @@ export default function RenderStatisticsComponent({
               {
                 key: "1",
                 label: "From 1 minute ago",
+                onClick: () =>
+                  downloadCSV(getFilteredData(1 * 60000), "stats_1min.csv"),
               },
               {
                 key: "2",
                 label: "From 5 minutes ago",
+                onClick: () =>
+                  downloadCSV(getFilteredData(5 * 60000), "stats_5min.csv"),
               },
               {
                 key: "3",
                 label: "From 10 minutes ago",
+                onClick: () =>
+                  downloadCSV(getFilteredData(10 * 60000), "stats_10min.csv"),
               },
               {
                 key: "4",
                 label: "From 15 minutes ago",
+                onClick: () =>
+                  downloadCSV(getFilteredData(15 * 60000), "stats_15min.csv"),
               },
               {
                 key: "5",
                 label: "All time",
+                onClick: () =>
+                  downloadCSV(
+                    getFilteredData(Number.MAX_SAFE_INTEGER),
+                    "stats_all.csv"
+                  ),
               },
             ],
           }}

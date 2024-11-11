@@ -1,10 +1,25 @@
-import { RedoOutlined } from "@ant-design/icons";
-import { Button, Tooltip } from "antd";
-import { useCallback, useEffect, useRef } from "react";
+import { RedoOutlined, SaveOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Tooltip } from "antd";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./Chart.css";
+import { downloadCSV, getFilteredData } from "./statisticsDataUtils";
 
 // @ts-ignore
 const autocolors = window["chartjs-plugin-autocolors"];
+
+function RecordCircle({ color }: any) {
+  return (
+    <div
+      style={{
+        width: 15,
+        height: 15,
+        borderRadius: 15,
+        backgroundColor: color,
+        border: "1.5px solid black",
+      }}
+    />
+  );
+}
 
 export default function ChartComponent({ data, ylabel }: any) {
   const ref = useRef(null);
@@ -106,13 +121,87 @@ export default function ChartComponent({ data, ylabel }: any) {
     chartRef.current.resetZoom();
   }, []);
 
+  const [recordState, setRecordState] = useState(false);
+  const [recordStartTimestamp, setRecordStartTimestamp] = useState(0);
+
   return (
     <div className="chart-wrapper">
-      <canvas ref={ref} width="400" height="300"></canvas>
       <div className="button-wrapper">
-        <Tooltip title="Reset zoom">
+        <Tooltip title="Reset zoom" placement="left">
           <Button size="middle" icon={<RedoOutlined />} onClick={resetZoom} />
         </Tooltip>
+        <Tooltip title="Save data" placement="left">
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: "1",
+                  label: "From 1 minute ago",
+                  onClick: () =>
+                    downloadCSV(getFilteredData(1 * 60000), "stats_1min.csv"),
+                },
+                {
+                  key: "2",
+                  label: "From 5 minutes ago",
+                  onClick: () =>
+                    downloadCSV(getFilteredData(5 * 60000), "stats_5min.csv"),
+                },
+                {
+                  key: "3",
+                  label: "From 10 minutes ago",
+                  onClick: () =>
+                    downloadCSV(getFilteredData(10 * 60000), "stats_10min.csv"),
+                },
+                {
+                  key: "4",
+                  label: "From 15 minutes ago",
+                  onClick: () =>
+                    downloadCSV(getFilteredData(15 * 60000), "stats_15min.csv"),
+                },
+                {
+                  key: "5",
+                  label: "All time",
+                  onClick: () =>
+                    downloadCSV(
+                      getFilteredData(Number.MAX_SAFE_INTEGER),
+                      "stats_all.csv"
+                    ),
+                },
+              ],
+            }}
+            trigger={["click"]}
+          >
+            <Button
+              size="middle"
+              style={{
+                width: 32,
+              }}
+            >
+              <SaveOutlined />
+            </Button>
+          </Dropdown>
+        </Tooltip>
+        <Tooltip title="Record data" placement="left">
+          <Button
+            size="middle"
+            icon={<RecordCircle color={recordState ? "red" : "transparent"} />}
+            onClick={() => {
+              if (recordState) {
+                setRecordState(false);
+                downloadCSV(
+                  getFilteredData(Date.now() - recordStartTimestamp),
+                  "stats_recorded.csv"
+                );
+              } else {
+                setRecordState(true);
+                setRecordStartTimestamp(Date.now());
+              }
+            }}
+          />
+        </Tooltip>
+      </div>
+      <div>
+        <canvas ref={ref} width="400" height="300"></canvas>
       </div>
     </div>
   );
