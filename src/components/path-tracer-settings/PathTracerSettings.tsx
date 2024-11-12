@@ -172,10 +172,11 @@ export default function PathTracerSettings() {
   );
 
   const setShowTaskGrid = useCallback(() => {
-    pathTracerParams.setShowTaskGrid(!pathTracerParams.showTaskGrid);
+    const showTaskGrid = !pathTracerParams.showTaskGrid;
+    pathTracerParams.setShowTaskGrid(showTaskGrid);
     updateRendererParameter(
       "SHOW_TASK_GRID",
-      pathTracerParams.showTaskGrid.toString()
+      showTaskGrid.toString()
     );
   }, [updateRendererParameter, pathTracerParams]);
 

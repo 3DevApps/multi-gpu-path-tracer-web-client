@@ -96,7 +96,7 @@ export const PathTracerParamsContextProvider = ({ children }: any) => {
   const [loadBalancingTaskSizeY, setLoadBalancingTaskSizeY] = useState(1);
   const [prevLoadBalancingTaskSizeY, setPrevLoadBalancingTaskSizeY] =
     useState(1);
-  const [showTaskGrid, setShowTaskGrid] = useState(false);
+  const [showTaskGrid, setShowTaskGrid] = useState(true);
   const [scenePositionX, setScenePositionX] = useState(0);
   const [scenePositionY, setScenePositionY] = useState(0);
   const [scenePositionZ, setScenePositionZ] = useState(0);
