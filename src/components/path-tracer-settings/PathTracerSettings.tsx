@@ -237,7 +237,7 @@ export default function PathTracerSettings() {
                 disabled={!isAdmin}
               />
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
               label="Task size"
               tooltip="The size of the task in load balancing algorithm"
             >
@@ -258,7 +258,7 @@ export default function PathTracerSettings() {
                 updateRendererParameter={updateRendererParameter}
                 disabled={!isAdmin}
               />
-            </Form.Item>
+            </Form.Item> */}
             <Form.Item>
               <Checkbox
                 onChange={setShowTaskGrid}
