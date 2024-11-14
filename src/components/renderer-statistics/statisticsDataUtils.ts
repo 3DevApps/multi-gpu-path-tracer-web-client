@@ -1,4 +1,5 @@
 const SESSION_STORAGE_KEY = "render_statistics_data";
+const SESSION_STORAGE_SAVED_DATA_KEY = "render_statistics_saved_data";
 
 export function storeDataPoint(category: string, name: string, value: any) {
   const timestamp = Date.now();
@@ -50,6 +51,27 @@ export function downloadCSV(data: any, fileName: string) {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+export function storeFilteredDataToSessionStorage(data: any, keyName: string) {
+  const savedKeys = JSON.parse(
+    localStorage.getItem(SESSION_STORAGE_SAVED_DATA_KEY) || "[]"
+  );
+  localStorage.setItem(
+    SESSION_STORAGE_SAVED_DATA_KEY,
+    JSON.stringify([...savedKeys, keyName])
+  );
+  localStorage.setItem(keyName, JSON.stringify(data));
+}
+
+export function getStoredDataKeys() {
+  return JSON.parse(
+    localStorage.getItem(SESSION_STORAGE_SAVED_DATA_KEY) || "[]"
+  );
+}
+
+export function getStoredData(key: string) {
+  return JSON.parse(localStorage.getItem(key) || "{}");
 }
 
 export function getFilteredData(milliseconds: number, category?: string) {

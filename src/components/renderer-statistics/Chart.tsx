@@ -2,7 +2,12 @@ import { RedoOutlined, SaveOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Tooltip } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./Chart.css";
-import { downloadCSV, getFilteredData } from "./statisticsDataUtils";
+import {
+  downloadCSV,
+  getFilteredData,
+  storeFilteredDataToSessionStorage,
+} from "./statisticsDataUtils";
+import { getFormattedDateTime } from "../../utils/getFormattedDate";
 
 // @ts-ignore
 const autocolors = window["chartjs-plugin-autocolors"];
@@ -137,47 +142,55 @@ export default function ChartComponent({ data, ylabel }: any) {
                 {
                   key: "1",
                   label: "From 1 minute ago",
-                  onClick: () =>
-                    downloadCSV(
-                      getFilteredData(1 * 60000, ylabel),
-                      "stats_1min.csv"
-                    ),
+                  onClick: () => {
+                    const data = getFilteredData(1 * 60000, ylabel);
+                    const name = `${getFormattedDateTime()}-stats-${ylabel}-1min`;
+                    downloadCSV(data, `${name}.csv`);
+                    storeFilteredDataToSessionStorage(data, name);
+                  },
                 },
                 {
                   key: "2",
                   label: "From 5 minutes ago",
-                  onClick: () =>
-                    downloadCSV(
-                      getFilteredData(5 * 60000, ylabel),
-                      "stats_5min.csv"
-                    ),
+                  onClick: () => {
+                    const data = getFilteredData(5 * 60000, ylabel);
+                    const name = `${getFormattedDateTime()}-stats-${ylabel}-5min`;
+                    downloadCSV(data, `${name}.csv`);
+                    storeFilteredDataToSessionStorage(data, name);
+                  },
                 },
                 {
                   key: "3",
                   label: "From 10 minutes ago",
-                  onClick: () =>
-                    downloadCSV(
-                      getFilteredData(10 * 60000, ylabel),
-                      "stats_10min.csv"
-                    ),
+                  onClick: () => {
+                    const data = getFilteredData(10 * 60000, ylabel);
+                    const name = `${getFormattedDateTime()}-stats-${ylabel}-10min`;
+                    downloadCSV(data, `${name}.csv`);
+                    storeFilteredDataToSessionStorage(data, name);
+                  },
                 },
                 {
                   key: "4",
                   label: "From 15 minutes ago",
-                  onClick: () =>
-                    downloadCSV(
-                      getFilteredData(15 * 60000, ylabel),
-                      "stats_15min.csv"
-                    ),
+                  onClick: () => {
+                    const data = getFilteredData(15 * 60000, ylabel);
+                    const name = `${getFormattedDateTime()}-stats-${ylabel}-15min`;
+                    downloadCSV(data, `${name}.csv`);
+                    storeFilteredDataToSessionStorage(data, name);
+                  },
                 },
                 {
                   key: "5",
                   label: "All time",
-                  onClick: () =>
-                    downloadCSV(
-                      getFilteredData(Number.MAX_SAFE_INTEGER),
-                      "stats_all.csv"
-                    ),
+                  onClick: () => {
+                    const data = getFilteredData(
+                      Number.MAX_SAFE_INTEGER,
+                      ylabel
+                    );
+                    const name = `${getFormattedDateTime()}-stats-${ylabel}-all`;
+                    downloadCSV(data, `${name}.csv`);
+                    storeFilteredDataToSessionStorage(data, name);
+                  },
                 },
               ],
             }}

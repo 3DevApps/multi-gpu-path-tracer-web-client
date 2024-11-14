@@ -10,8 +10,15 @@ export default class H264Decoder {
   decoder: VideoDecoder | null;
   firstFrame: boolean;
   onFrame: OnFrameCallback;
+  currentProcessedFrameCount: number;
+  framesCount: any;
 
-  constructor(width: number, height: number, onFrame: OnFrameCallback) {
+  constructor(
+    width: number,
+    height: number,
+    onFrame: OnFrameCallback,
+    framesCount: any
+  ) {
     // this.codecString = "avc1.42001E"; // Baseline profile
     this.codecString = "avc1.640034"; // High profile
     this.optimizeForLatency = true;
@@ -20,6 +27,8 @@ export default class H264Decoder {
     this.decoder = null;
     this.firstFrame = true;
     this.onFrame = onFrame;
+    this.currentProcessedFrameCount = 0;
+    this.framesCount = framesCount;
 
     this.initDecoder();
   }
@@ -114,6 +123,7 @@ export default class H264Decoder {
       this.onFrame(frame);
     } finally {
       frame.close();
+      this.framesCount.current--;
     }
   }
 

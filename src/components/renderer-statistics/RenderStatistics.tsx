@@ -24,7 +24,9 @@ import {
   downloadCSV,
   getFilteredData,
   storeDataPoint,
+  storeFilteredDataToSessionStorage,
 } from "./statisticsDataUtils";
+import { getFormattedDateTime } from "../../utils/getFormattedDate";
 
 export type RenderStatistics = string[];
 
@@ -109,15 +111,23 @@ export default function RenderStatisticsComponent({
     }
   }, [renderStatistics]);
 
-  const { fps } = useContext(StatisticsContext);
+  const { fps, averageFps } = useContext(StatisticsContext);
   useEffect(() => {
     const timestamp = Date.now();
     if (!categorizedEntries["FPS"]) {
       categorizedEntries["FPS"] = {};
     }
     categorizedEntries["FPS"]["FPS"] = { value: fps, timestamp };
+    if (!categorizedEntries["Average FPS"]) {
+      categorizedEntries["Average FPS"] = {};
+    }
+    categorizedEntries["FPS"]["Average FPS"] = {
+      value: averageFps,
+      timestamp,
+    };
     storeDataPoint("FPS", "FPS", fps);
-  }, [fps]);
+    storeDataPoint("FPS", "Average FPS", averageFps);
+  }, [fps, averageFps]);
 
   const { isAdmin } = useContext(JobSettingsContext);
 
@@ -144,35 +154,52 @@ export default function RenderStatisticsComponent({
               {
                 key: "1",
                 label: "From 1 minute ago",
-                onClick: () =>
-                  downloadCSV(getFilteredData(1 * 60000), "stats_1min.csv"),
+                onClick: () => {
+                  const data = getFilteredData(1 * 60000);
+                  const name = `${getFormattedDateTime()}-stats-1min`;
+                  downloadCSV(data, `${name}.csv`);
+                  storeFilteredDataToSessionStorage(data, name);
+                },
               },
               {
                 key: "2",
                 label: "From 5 minutes ago",
-                onClick: () =>
-                  downloadCSV(getFilteredData(5 * 60000), "stats_5min.csv"),
+                onClick: () => {
+                  const data = getFilteredData(5 * 60000);
+                  const name = `${getFormattedDateTime()}-stats-5min`;
+                  downloadCSV(data, `${name}.csv`);
+                  storeFilteredDataToSessionStorage(data, name);
+                },
               },
               {
                 key: "3",
                 label: "From 10 minutes ago",
-                onClick: () =>
-                  downloadCSV(getFilteredData(10 * 60000), "stats_10min.csv"),
+                onClick: () => {
+                  const data = getFilteredData(10 * 60000);
+                  const name = `${getFormattedDateTime()}-stats-10min`;
+                  downloadCSV(data, `${name}.csv`);
+                  storeFilteredDataToSessionStorage(data, name);
+                },
               },
               {
                 key: "4",
                 label: "From 15 minutes ago",
-                onClick: () =>
-                  downloadCSV(getFilteredData(15 * 60000), "stats_15min.csv"),
+                onClick: () => {
+                  const data = getFilteredData(15 * 60000);
+                  const name = `${getFormattedDateTime()}-stats-15min`;
+                  downloadCSV(data, `${name}.csv`);
+                  storeFilteredDataToSessionStorage(data, name);
+                },
               },
               {
                 key: "5",
                 label: "All time",
-                onClick: () =>
-                  downloadCSV(
-                    getFilteredData(Number.MAX_SAFE_INTEGER),
-                    "stats_all.csv"
-                  ),
+                onClick: () => {
+                  const data = getFilteredData(Number.MAX_SAFE_INTEGER);
+                  const name = `${getFormattedDateTime()}-stats-all`;
+                  downloadCSV(data, `${name}.csv`);
+                  storeFilteredDataToSessionStorage(data, name);
+                },
               },
             ],
           }}

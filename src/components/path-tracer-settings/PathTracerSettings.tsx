@@ -10,13 +10,16 @@ import "./PathTracerSettings.css";
 import {
   Button,
   Checkbox,
+  Col,
   Divider,
   Dropdown,
   Flex,
   Form,
   InputNumber,
   message,
+  Row,
   Select,
+  Slider,
   Space,
   Tooltip,
 } from "antd";
@@ -174,10 +177,7 @@ export default function PathTracerSettings() {
   const setShowTaskGrid = useCallback(() => {
     const showTaskGrid = !pathTracerParams.showTaskGrid;
     pathTracerParams.setShowTaskGrid(showTaskGrid);
-    updateRendererParameter(
-      "SHOW_TASK_GRID",
-      showTaskGrid.toString()
-    );
+    updateRendererParameter("SHOW_TASK_GRID", showTaskGrid.toString());
   }, [updateRendererParameter, pathTracerParams]);
 
   const loadSettingsFromJSON = useCallback(() => {
@@ -376,6 +376,30 @@ export default function PathTracerSettings() {
                 separator=","
                 minValue={null}
               />
+            </Form.Item>
+            <Form.Item label="Camera move speed">
+              <Row>
+                <Col span={12}>
+                  <Slider
+                    min={0}
+                    max={100}
+                    onChange={pathTracerParams.setMoveSpeed}
+                    value={pathTracerParams.moveSpeed}
+                    step={0.1}
+                  />
+                </Col>
+                <Col span={4}>
+                  <InputNumber
+                    min={0}
+                    max={100}
+                    style={{ margin: "0 16px" }}
+                    step={0.1}
+                    value={pathTracerParams.moveSpeed}
+                    // @ts-ignore
+                    onChange={pathTracerParams.setMoveSpeed}
+                  />
+                </Col>
+              </Row>
             </Form.Item>
             <Form.Item>
               <Flex align="center" justify="center">

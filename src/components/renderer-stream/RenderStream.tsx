@@ -11,45 +11,51 @@ import { useMouseHandler } from "../../hooks/useMouseHandler";
 import H264Decoder from "../../utils/H264Decoder";
 import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext";
 import { StatisticsContext } from "../../contexts/StatisticsContext";
+import { WebsocketContext } from "../../contexts/WebsocketContext";
 
-const MIN_SPEED = 5;
-const MAX_SPEED = 50;
-const SPEED_INCREMENT = (MAX_SPEED - MIN_SPEED) / 40;
+const MAX_SPEED = 100;
+const SPEED_INCREMENT = 45 / 40;
 
 function useKeyPressHandler() {
   const { sendMessage } = useWebSocketConnection();
-  const moveSpeed = React.useRef(MIN_SPEED.toString());
+  const { moveSpeed } = useContext(PathTracerParamsContext);
+  const moveSpeedInternal = React.useRef(moveSpeed.toString());
   const initialKeyPressTimeoutMap = React.useRef<any>({});
   const keyPressIntervalMap = React.useRef<any>({});
 
+  useEffect(() => {
+    moveSpeedInternal.current = moveSpeed.toString();
+  }, [moveSpeed]);
+
+  // deprecated: speed is now controlled by the slider
   const increaseSpeed = useCallback(() => {
-    const newSpeed = parseFloat(moveSpeed.current) + SPEED_INCREMENT;
-    moveSpeed.current =
+    const newSpeed = parseFloat(moveSpeedInternal.current) + SPEED_INCREMENT;
+    moveSpeedInternal.current =
       newSpeed > MAX_SPEED ? MAX_SPEED.toString() : newSpeed.toString();
   }, []);
 
   const keyPressHandler = useCallback(
     (event: KeyboardEvent) => {
       const key = event.key.toUpperCase();
-      increaseSpeed();
+      // increaseSpeed();
       switch (key) {
         case "W":
-          sendMessage(["CAMERA_EVENT", "FORWARD", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "FORWARD", moveSpeedInternal.current]);
           break;
         case "A":
-          sendMessage(["CAMERA_EVENT", "LEFT", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "LEFT", moveSpeedInternal.current]);
           break;
         case "S":
-          sendMessage(["CAMERA_EVENT", "BACKWARD", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "BACKWARD", moveSpeedInternal.current]);
           break;
         case "D":
-          sendMessage(["CAMERA_EVENT", "RIGHT", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "RIGHT", moveSpeedInternal.current]);
           break;
         case "Q":
-          sendMessage(["CAMERA_EVENT", "DOWN", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "DOWN", moveSpeedInternal.current]);
           break;
         case "E":
-          sendMessage(["CAMERA_EVENT", "UP", moveSpeed.current]);
+          sendMessage(["CAMERA_EVENT", "UP", moveSpeedInternal.current]);
           break;
         case "[":
           event.ctrlKey && sendMessage(["CAMERA_EVENT", "FOV-"]);
@@ -61,7 +67,7 @@ function useKeyPressHandler() {
           break;
       }
     },
-    [moveSpeed, sendMessage, increaseSpeed]
+    [moveSpeedInternal, sendMessage, increaseSpeed]
   );
 
   const onKeyDown = useCallback(
@@ -88,7 +94,7 @@ function useKeyPressHandler() {
     clearTimeout(initialKeyPressTimeoutMap.current[event.key]);
     delete initialKeyPressTimeoutMap.current[event.key];
 
-    moveSpeed.current = MIN_SPEED.toString();
+    // moveSpeedInternal.current = MIN_SPEED.toString();
   }, []);
 
   useEffect(() => {
@@ -107,7 +113,8 @@ function useFrameHandler(
   renderData: Blob | null
 ) {
   const { width, height } = useContext(PathTracerParamsContext);
-  const { setFps } = useContext(StatisticsContext);
+  const { setFps, updateAverageFps } = useContext(StatisticsContext);
+  const { framesCount } = useContext(WebsocketContext);
   const frames = useRef<number[]>([]);
 
   const frameHandler = useCallback(
@@ -117,6 +124,7 @@ function useFrameHandler(
       const ctx = canvas.getContext("2d");
       ctx!.drawImage(frame, 0, 0);
 
+      // TODO: improve this
       const now = performance.now();
       const framesRef = frames.current;
       framesRef.push(now);
@@ -124,13 +132,14 @@ function useFrameHandler(
         framesRef.shift();
       }
 
-      setFps(framesRef.length);
+      // setFps(framesRef.length);
+      // updateAverageFps(framesRef.length);
     },
-    [canvasRef]
+    [canvasRef, setFps, updateAverageFps]
   );
 
   const decoder = useRef<H264Decoder | null>(
-    new H264Decoder(width, height, frameHandler)
+    new H264Decoder(width, height, frameHandler, framesCount)
   );
 
   useEffect(() => {
@@ -139,7 +148,8 @@ function useFrameHandler(
 
   useEffect(() => {
     const fn = async () => {
-      if (!renderData) return;
+      if (!renderData || decoder.current!.currentProcessedFrameCount > 1)
+        return;
       const arrayBuffer = await renderData.arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
       await decoder.current?.decode(uint8Array);

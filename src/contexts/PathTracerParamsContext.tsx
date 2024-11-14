@@ -50,6 +50,8 @@ type PathTracerParamsContextType = {
   setPitch: (pitch: number) => void;
   yaw: number;
   setYaw: (yaw: number) => void;
+  moveSpeed: number;
+  setMoveSpeed: (moveSpeed: number) => void;
 };
 
 export const PathTracerParamsContext = createContext(
@@ -102,6 +104,7 @@ export const PathTracerParamsContextProvider = ({ children }: any) => {
   const [scenePositionZ, setScenePositionZ] = useState(0);
   const [pitch, setPitch] = useState(0);
   const [yaw, setYaw] = useState(0);
+  const [moveSpeed, setMoveSpeed] = useState(5);
 
   const exportStateToJSON = () => {
     return JSON.stringify({
@@ -203,6 +206,8 @@ export const PathTracerParamsContextProvider = ({ children }: any) => {
         setPitch,
         yaw,
         setYaw,
+        moveSpeed,
+        setMoveSpeed,
       }}
     >
       {children}

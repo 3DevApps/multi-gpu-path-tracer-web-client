@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import "./Chart.css";
+import { Button, Tooltip } from "antd";
+import { RedoOutlined } from "@ant-design/icons";
 
 // @ts-ignore
 const autocolors = window["chartjs-plugin-autocolors"];
@@ -22,6 +24,12 @@ export default function StaticChartComponent({ data, ylabel }: any) {
       return {
         label: key,
         cubicInterpolationMode: "monotone",
+        data: data[key].map((value: any, index: number) => {
+          return {
+            x: index,
+            y: value,
+          };
+        }),
       };
     });
 
@@ -70,11 +78,21 @@ export default function StaticChartComponent({ data, ylabel }: any) {
       // @ts-ignore
       chartRef.current?.destroy();
     };
-  }, []);
+  }, [data, ylabel]);
+
+  function resetZoom() {
+    // @ts-ignore
+    chartRef.current.resetZoom();
+  }
 
   return (
     <div className="chart-wrapper">
-      <canvas ref={ref} width="400" height="300"></canvas>
+      <div className="button-wrapper">
+        <Tooltip title="Reset zoom" placement="left">
+          <Button size="middle" icon={<RedoOutlined />} onClick={resetZoom} />
+        </Tooltip>
+      </div>
+      <canvas ref={ref} width="500" height="400"></canvas>
     </div>
   );
 }
