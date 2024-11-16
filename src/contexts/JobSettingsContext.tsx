@@ -17,7 +17,7 @@ export const JobSettingsContextProvider = ({ children }: any) => {
       jobId: urlParams.get("jobId"),
       isDebugJob: urlParams.get("debugJob") === "true",
     };
-  }, []);
+  }, [window.location.search]);
 
   return (
     <JobSettingsContext.Provider

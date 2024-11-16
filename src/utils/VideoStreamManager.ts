@@ -41,11 +41,11 @@ export class VideoStreamManager {
           break;
 
         case "wsConnected":
-          console.log("WebSocket connected");
+          console.log("WebSocket streaming connection has been opened!");
           break;
 
         case "wsDisconnected":
-          console.log("WebSocket disconnected");
+          console.log("WebSocket streaming connection has been closed!");
           break;
       }
     };

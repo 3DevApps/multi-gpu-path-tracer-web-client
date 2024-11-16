@@ -74,7 +74,6 @@ class VideoDecoderWorker {
     };
 
     this.websocket.onmessage = async (event) => {
-      console.log("Received frame data");
       if (!this.decoder) return;
 
       try {
