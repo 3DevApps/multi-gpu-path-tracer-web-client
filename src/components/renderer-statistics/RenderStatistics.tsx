@@ -16,7 +16,6 @@ import {
 } from "@ant-design/icons";
 import { useMouseHandler } from "../../hooks/useMouseHandler";
 import Chart from "./Chart";
-import { StatisticsContext } from "../../contexts/StatisticsContext";
 import { Button, Dropdown, Flex, Space } from "antd";
 import { JobSettingsContext } from "../../contexts/JobSettingsContext";
 import ChartAnalysis from "./ChartAnalysis";
@@ -111,26 +110,7 @@ export default function RenderStatisticsComponent({
     }
   }, [renderStatistics]);
 
-  const { fps, averageFps } = useContext(StatisticsContext);
-  useEffect(() => {
-    const timestamp = Date.now();
-    if (!categorizedEntries["FPS"]) {
-      categorizedEntries["FPS"] = {};
-    }
-    categorizedEntries["FPS"]["FPS"] = { value: fps, timestamp };
-    if (!categorizedEntries["Average FPS"]) {
-      categorizedEntries["Average FPS"] = {};
-    }
-    categorizedEntries["FPS"]["Average FPS"] = {
-      value: averageFps,
-      timestamp,
-    };
-    storeDataPoint("FPS", "FPS", fps);
-    storeDataPoint("FPS", "Average FPS", averageFps);
-  }, [fps, averageFps]);
-
   const { isAdmin } = useContext(JobSettingsContext);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (

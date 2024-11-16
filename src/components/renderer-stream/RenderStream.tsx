@@ -8,10 +8,9 @@ import React, {
 import "./RenderStream.css";
 import { useWebSocketConnection } from "../../hooks/useWebSocketConnection";
 import { useMouseHandler } from "../../hooks/useMouseHandler";
-import H264Decoder from "../../utils/H264Decoder";
 import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext";
-import { StatisticsContext } from "../../contexts/StatisticsContext";
-import { WebsocketContext } from "../../contexts/WebsocketContext";
+import { VideoStreamManager } from "../../utils/VideoStreamManager";
+import { JobSettingsContext } from "../../contexts/JobSettingsContext";
 
 const MAX_SPEED = 100;
 const SPEED_INCREMENT = 45 / 40;
@@ -108,59 +107,25 @@ function useKeyPressHandler() {
   }, [onKeyDown, onKeyUp]);
 }
 
-function useFrameHandler(
-  canvasRef: React.RefObject<HTMLCanvasElement>,
-  renderData: Blob | null
-) {
+function useFrameHandler(canvasRef: React.RefObject<HTMLCanvasElement>) {
+  const streamManager = useRef<VideoStreamManager | null>(null);
+  const { jobId } = useContext(JobSettingsContext);
   const { width, height } = useContext(PathTracerParamsContext);
-  const { setFps, updateAverageFps } = useContext(StatisticsContext);
-  const { framesCount } = useContext(WebsocketContext);
-  const frames = useRef<number[]>([]);
-
-  const frameHandler = useCallback(
-    (frame: VideoFrame) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      ctx!.drawImage(frame, 0, 0);
-
-      // TODO: improve this
-      const now = performance.now();
-      const framesRef = frames.current;
-      framesRef.push(now);
-      while (framesRef.length > 0 && framesRef[0] < now - 1000) {
-        framesRef.shift();
-      }
-
-      // setFps(framesRef.length);
-      // updateAverageFps(framesRef.length);
-    },
-    [canvasRef, setFps, updateAverageFps]
-  );
-
-  const decoder = useRef<H264Decoder | null>(
-    new H264Decoder(width, height, frameHandler, framesCount)
-  );
 
   useEffect(() => {
-    decoder.current?.resetDecoder(width, height);
+    if (canvasRef.current !== null && streamManager.current === null && jobId) {
+      streamManager.current = new VideoStreamManager(jobId, canvasRef.current);
+    }
+  }, [canvasRef.current, jobId]);
+
+  useEffect(() => {
+    streamManager.current?.resize(width, height);
   }, [width, height]);
-
-  useEffect(() => {
-    const fn = async () => {
-      if (!renderData || decoder.current!.currentProcessedFrameCount > 1)
-        return;
-      const arrayBuffer = await renderData.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      await decoder.current?.decode(uint8Array);
-    };
-    fn();
-  }, [renderData]);
 }
 
 export default function RenderStream() {
   useKeyPressHandler();
-  const { sendMessage, renderData } = useWebSocketConnection();
+  const { sendMessage } = useWebSocketConnection();
   const { width, height } = useContext(PathTracerParamsContext);
 
   const mouseMoveHandler: MouseEventHandler<HTMLElement> = useCallback(
@@ -174,11 +139,16 @@ export default function RenderStream() {
     useMouseHandler(mouseMoveHandler);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  useFrameHandler(canvasRef, renderData);
+  useFrameHandler(canvasRef);
 
   return (
     <section onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}>
-      <canvas ref={canvasRef} width={width} height={height}></canvas>
+      <canvas
+        id="renderCanvas"
+        ref={canvasRef}
+        width={width}
+        height={height}
+      ></canvas>
     </section>
   );
 }

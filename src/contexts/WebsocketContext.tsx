@@ -21,7 +21,7 @@ export const WebsocketContext = createContext({} as WebsocketContextType);
 
 export const WebsocketContextProvider = ({ children }: any) => {
   const [message, setMessage] = useState<string[] | null>(null);
-  const [renderData, setRenderData] = useState<Blob | null>(null);
+  const [renderData] = useState<Blob | null>(null);
   const socket = useRef<WebSocket | null>(null);
   const framesCount = useRef(0);
 
@@ -41,14 +41,7 @@ export const WebsocketContextProvider = ({ children }: any) => {
       if (rawData instanceof Blob) {
         // Read first 10 bytes to determine the message type
         const text = await rawData.slice(0, 10).text();
-        if (text.startsWith("RENDER#")) {
-          console.log("RENDER#", framesCount.current);
-          if (framesCount.current > 1) {
-            return;
-          }
-          framesCount.current += 1;
-          requestAnimationFrame(() => setRenderData(rawData.slice(7)));
-        } else if (text.startsWith("SNAPSHOT#")) {
+        if (text.startsWith("SNAPSHOT#")) {
           const a = document.createElement("a");
           a.href = URL.createObjectURL(rawData.slice(9));
           a.download = `view-${getFormattedDateTime()}.png`;
