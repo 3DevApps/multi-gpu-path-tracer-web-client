@@ -1,6 +1,7 @@
 import { Flex, InputNumber } from "antd";
 import React, { useEffect } from "react";
 import SettingChangeButton from "./SettingChangeButton";
+import useProtobufTypes from "../../hooks/useProtobufTypes";
 
 export default function DoubleValueInput({
   firstValue,
@@ -25,7 +26,7 @@ export default function DoubleValueInput({
   setSecondValue: (value: number) => void;
   prevSecondValue?: number;
   setPrevSecondValue?: (value: number) => void;
-  updateRendererParameter: (key: string, value: string) => void;
+  updateRendererParameter: (key: string, value: any) => void;
   disabled: boolean;
   keyName: string;
   separator?: string;
@@ -35,6 +36,7 @@ export default function DoubleValueInput({
     React.useState(firstValue);
   const [internalSecondValue, setInternalSecondValue] =
     React.useState(secondValue);
+  const { RendererEvent } = useProtobufTypes();
 
   useEffect(() => {
     setIntarnalFirstValue(firstValue);
@@ -68,6 +70,15 @@ export default function DoubleValueInput({
           `${prevFirstValue}x${prevSecondValue}`
         }
         onClick={() => {
+          // @ts-ignore
+          const message = RendererEvent.create({
+            // @ts-ignore
+            type: RendererEvent.Type[keyName],
+            blockValue: {
+              x: internalFirstValue,
+              y: internalSecondValue,
+            },
+          });
           updateRendererParameter(
             keyName,
             `${internalFirstValue}#${internalSecondValue}`

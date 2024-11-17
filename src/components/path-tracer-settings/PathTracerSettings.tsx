@@ -41,6 +41,7 @@ import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext"
 import SettingChangeButton from "./SettingChangeButton";
 import DoubleValueInput from "./DoubleValueInput";
 import TripleValueInput from "./TripleValueInput";
+import useProtobufTypes from "../../hooks/useProtobufTypes";
 
 function NumberInput({
   inputValue,
@@ -52,13 +53,14 @@ function NumberInput({
 }: {
   inputValue: number;
   setInputValue: (value: number) => void;
-  updateRendererParameter: (parameterKey: string, value: string) => void;
+  updateRendererParameter: (parameterKey: string, value: any) => void;
   parameterKey: string;
   disabled?: boolean;
   showSettingChangeButton?: boolean;
 }) {
   const [prevValue, setPrevValue] = useState(inputValue);
   const [value, setValue] = useState(inputValue);
+  const { RendererEvent } = useProtobufTypes();
 
   useEffect(() => {
     setValue(inputValue);
@@ -78,7 +80,13 @@ function NumberInput({
           value={value}
           prevValue={prevValue}
           onClick={() => {
-            updateRendererParameter(parameterKey, value.toString());
+            // @ts-ignore
+            const message = RendererEvent.create({
+              // @ts-ignore
+              type: RendererEvent.Type[parameterKey],
+              numberValue: value,
+            });
+            updateRendererParameter(parameterKey, message);
             setPrevValue(value);
             setInputValue(value);
           }}
@@ -90,7 +98,7 @@ function NumberInput({
 }
 
 export default function PathTracerSettings() {
-  const { sendMessage } = useWebSocketConnection();
+  const { sendRawMessage } = useWebSocketConnection();
   const { jobId, isAdmin } = useContext(JobSettingsContext);
   const [asideStyle, setAsideStyle] = useState({ left: 0 });
   const pathTracerParams = useContext(PathTracerParamsContext);
@@ -102,6 +110,7 @@ export default function PathTracerSettings() {
     }),
     [asideStyle]
   );
+  const { Event, CameraEvent, RendererEvent } = useProtobufTypes();
 
   const toggleAside = useCallback(() => {
     setAsideStyle((prev) => ({
@@ -138,7 +147,17 @@ export default function PathTracerSettings() {
       }
 
       message.success("Upload successful!");
-      sendMessage(["RENDERER_PARAMETER", "LOAD_UPLOADED_SCENE"]);
+
+      // @ts-ignore
+      const newMessage = RendererEvent.create({
+        // @ts-ignore
+        type: RendererEvent.Type.LOAD_UPLOADED_SCENE,
+      });
+      updateRendererParameter(
+        "LOAD_UPLOADED_SCENE",
+        // @ts-ignore
+        RendererEvent.encode(newMessage).finish()
+      );
     } catch (error) {
       message.error("Upload failed - network error");
       console.error(
@@ -155,30 +174,83 @@ export default function PathTracerSettings() {
   };
 
   const updateRendererParameter = useCallback(
-    (parameterKey: string, value: string) => {
-      // TODO: improve this
+    (parameterKey: string, value: any) => {
+      // TODO: improve this - do not split string + move those parameters
       if (parameterKey === "PITCH_YAW" || parameterKey === "SCENE_POSITION") {
-        sendMessage(["CAMERA_EVENT", parameterKey, value]);
+        let eventData = {};
+        switch (parameterKey) {
+          case "PITCH_YAW":
+            const [pitch, yaw] = value.split("#");
+            eventData = {
+              // @ts-ignore
+              type: CameraEvent.Type.PITCH_YAW,
+              rotation: {
+                pitch: Number(pitch),
+                yaw: Number(yaw),
+              },
+            };
+            break;
+          case "SCENE_POSITION":
+            const [x, y, z] = value.split("#");
+            eventData = {
+              // @ts-ignore
+              type: CameraEvent.Type.SCENE_POSITION,
+              position: { x: Number(x), y: Number(y), z: Number(z) },
+            };
+            break;
+          default:
+            return;
+        }
+        // @ts-ignore
+        const cameraEventMessage = CameraEvent.create(eventData);
+        // @ts-ignore
+        const message = Event.create({
+          // @ts-ignore
+          type: Event.EventType.CAMERA_EVENT,
+          camera: cameraEventMessage,
+        });
+        // @ts-ignore
+        sendRawMessage(Event.encode(message).finish());
         return;
       }
-      sendMessage(["RENDERER_PARAMETER", parameterKey, value]);
+      // @ts-ignore
+      const message = Event.create({
+        // @ts-ignore
+        type: Event.EventType.RENDERER_EVENT,
+        renderer: value,
+      });
+      // @ts-ignore
+      sendRawMessage(Event.encode(message).finish());
     },
-    [sendMessage]
+    [sendRawMessage, Event, CameraEvent]
   );
 
   const setLoadBalancingAlgorithm = useCallback(
     (value: string) => {
-      updateRendererParameter("LOAD_BALANCING_ALGORITHM", value);
+      // @ts-ignore
+      const message = RendererEvent.create({
+        // @ts-ignore
+        type: RendererEvent.Type.LOAD_BALANCING_ALGORITHM,
+        // @ts-ignore
+        loadBalancingAlgorithm: RendererEvent.LoadBalancingAlgorithm[value],
+      });
+      updateRendererParameter("LOAD_BALANCING_ALGORITHM", message);
       pathTracerParams.setLoadBalancingAlgorithm(value);
     },
-    [updateRendererParameter, pathTracerParams]
+    [updateRendererParameter, pathTracerParams, RendererEvent]
   );
 
   const setShowTaskGrid = useCallback(() => {
     const showTaskGrid = !pathTracerParams.showTaskGrid;
     pathTracerParams.setShowTaskGrid(showTaskGrid);
-    updateRendererParameter("SHOW_TASK_GRID", showTaskGrid.toString());
-  }, [updateRendererParameter, pathTracerParams]);
+    // @ts-ignore
+    const message = RendererEvent.create({
+      // @ts-ignore
+      type: RendererEvent.Type.SHOW_TASK_GRID,
+      booleanValue: showTaskGrid,
+    });
+    updateRendererParameter("SHOW_TASK_GRID", message);
+  }, [updateRendererParameter, pathTracerParams, RendererEvent]);
 
   const loadSettingsFromJSON = useCallback(() => {
     const input = document.createElement("input");
@@ -237,28 +309,6 @@ export default function PathTracerSettings() {
                 disabled={!isAdmin}
               />
             </Form.Item>
-            {/* <Form.Item
-              label="Task size"
-              tooltip="The size of the task in load balancing algorithm"
-            >
-              <DoubleValueInput
-                keyName="LOAD_BALANCING_TASK_SIZE"
-                firstValue={pathTracerParams.loadBalancingTaskSizeX}
-                prevFirstValue={pathTracerParams.prevLoadBalancingTaskSizeX}
-                setFirstValue={pathTracerParams.setLoadBalancingTaskSizeX}
-                setPrevFirstValue={
-                  pathTracerParams.setPrevLoadBalancingTaskSizeX
-                }
-                secondValue={pathTracerParams.loadBalancingTaskSizeY}
-                setSecondValue={pathTracerParams.setLoadBalancingTaskSizeY}
-                prevSecondValue={pathTracerParams.prevLoadBalancingTaskSizeY}
-                setPrevSecondValue={
-                  pathTracerParams.setPrevLoadBalancingTaskSizeY
-                }
-                updateRendererParameter={updateRendererParameter}
-                disabled={!isAdmin}
-              />
-            </Form.Item> */}
             <Form.Item>
               <Checkbox
                 onChange={setShowTaskGrid}
@@ -459,12 +509,14 @@ export default function PathTracerSettings() {
                   className="primary-button"
                   type="primary"
                   icon={<DownloadOutlined />}
-                  onClick={() =>
-                    sendMessage([
-                      "RENDERER_PARAMETER",
-                      "DOWNLOAD_SCENE_SNAPSHOT",
-                    ])
-                  }
+                  onClick={() => {
+                    // @ts-ignore
+                    const message = RendererEvent.create({
+                      // @ts-ignore
+                      type: RendererEvent.Type.DOWNLOAD_SCENE_SNAPSHOT,
+                    });
+                    updateRendererParameter("RENDERER_PARAMETER", message);
+                  }}
                   disabled={!isAdmin}
                 >
                   Download current view

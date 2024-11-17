@@ -11,16 +11,18 @@ import { useMouseHandler } from "../../hooks/useMouseHandler";
 import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext";
 import { VideoStreamManager } from "../../utils/VideoStreamManager";
 import { JobSettingsContext } from "../../contexts/JobSettingsContext";
+import useProtobufTypes from "../../hooks/useProtobufTypes";
 
 const MAX_SPEED = 100;
 const SPEED_INCREMENT = 45 / 40;
 
 function useKeyPressHandler() {
-  const { sendMessage } = useWebSocketConnection();
+  const { sendRawMessage } = useWebSocketConnection();
   const { moveSpeed } = useContext(PathTracerParamsContext);
   const moveSpeedInternal = React.useRef(moveSpeed.toString());
   const initialKeyPressTimeoutMap = React.useRef<any>({});
   const keyPressIntervalMap = React.useRef<any>({});
+  const { Event, CameraEvent } = useProtobufTypes();
 
   useEffect(() => {
     moveSpeedInternal.current = moveSpeed.toString();
@@ -35,38 +37,82 @@ function useKeyPressHandler() {
 
   const keyPressHandler = useCallback(
     (event: KeyboardEvent) => {
+      if (!Event || !CameraEvent) {
+        return;
+      }
       const key = event.key.toUpperCase();
       // increaseSpeed();
+      let eventData = {};
       switch (key) {
         case "W":
-          sendMessage(["CAMERA_EVENT", "FORWARD", moveSpeedInternal.current]);
+          eventData = {
+            // @ts-ignore
+            type: CameraEvent.Type.FORWARD,
+            moveSpeed: Number(moveSpeedInternal.current),
+          };
           break;
         case "A":
-          sendMessage(["CAMERA_EVENT", "LEFT", moveSpeedInternal.current]);
+          eventData = {
+            // @ts-ignore
+            type: CameraEvent.Type.LEFT,
+            moveSpeed: Number(moveSpeedInternal.current),
+          };
           break;
         case "S":
-          sendMessage(["CAMERA_EVENT", "BACKWARD", moveSpeedInternal.current]);
+          eventData = {
+            // @ts-ignore
+            type: CameraEvent.Type.BACKWARD,
+            moveSpeed: Number(moveSpeedInternal.current),
+          };
           break;
         case "D":
-          sendMessage(["CAMERA_EVENT", "RIGHT", moveSpeedInternal.current]);
+          eventData = {
+            // @ts-ignore
+            type: CameraEvent.Type.RIGHT,
+            moveSpeed: Number(moveSpeedInternal.current),
+          };
           break;
         case "Q":
-          sendMessage(["CAMERA_EVENT", "DOWN", moveSpeedInternal.current]);
+          eventData = {
+            // @ts-ignore
+            type: CameraEvent.Type.DOWN,
+            moveSpeed: Number(moveSpeedInternal.current),
+          };
           break;
         case "E":
-          sendMessage(["CAMERA_EVENT", "UP", moveSpeedInternal.current]);
+          eventData = {
+            // @ts-ignore
+            type: CameraEvent.Type.UP,
+            moveSpeed: Number(moveSpeedInternal.current),
+          };
           break;
         case "[":
-          event.ctrlKey && sendMessage(["CAMERA_EVENT", "FOV-"]);
+          if (!event.ctrlKey) {
+            return;
+          }
+          // @ts-ignore
+          eventData = { type: CameraEvent.Type.FOV_DECREASE };
           break;
         case "]":
-          event.ctrlKey && sendMessage(["CAMERA_EVENT", "FOV+"]);
+          if (!event.ctrlKey) {
+            return;
+          }
+          // @ts-ignore
+          eventData = { type: CameraEvent.Type.FOV_INCREASE };
           break;
         default:
-          break;
+          return;
       }
+      // @ts-ignore
+      const cameraEventMessage = CameraEvent.create(eventData);
+      const message = Event.create({
+        // @ts-ignore
+        type: Event.EventType.CAMERA_EVENT,
+        camera: cameraEventMessage,
+      });
+      sendRawMessage(Event.encode(message).finish());
     },
-    [moveSpeedInternal, sendMessage, increaseSpeed]
+    [moveSpeedInternal, sendRawMessage, increaseSpeed, Event, CameraEvent]
   );
 
   const onKeyDown = useCallback(
@@ -125,15 +171,26 @@ function useFrameHandler(canvasRef: React.RefObject<HTMLCanvasElement>) {
 
 export default function RenderStream() {
   useKeyPressHandler();
-  const { sendMessage } = useWebSocketConnection();
+  const { sendRawMessage } = useWebSocketConnection();
   const { width, height } = useContext(PathTracerParamsContext);
+  const { Event } = useProtobufTypes();
 
   const mouseMoveHandler: MouseEventHandler<HTMLElement> = useCallback(
     (e) => {
       const { movementX, movementY } = e;
-      sendMessage(["MOUSE_MOVE", movementX.toString(), movementY.toString()]);
+      // @ts-ignore
+      const message = Event.create({
+        // @ts-ignore
+        type: Event.EventType.MOUSE_MOVE,
+        mouseMove: {
+          xOffset: movementX,
+          yOffset: movementY,
+        },
+      });
+      // @ts-ignore
+      sendRawMessage(Event.encode(message).finish());
     },
-    [sendMessage]
+    [sendRawMessage, Event]
   );
   const { handleMouseDown, handleMouseMove } =
     useMouseHandler(mouseMoveHandler);

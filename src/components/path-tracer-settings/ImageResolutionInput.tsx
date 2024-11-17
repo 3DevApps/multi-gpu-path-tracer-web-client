@@ -4,12 +4,13 @@ import { LockOutlined, UnlockOutlined } from "@ant-design/icons";
 import "./ImageResolutionInput.css";
 import SettingChangeButton from "./SettingChangeButton";
 import { PathTracerParamsContext } from "../../contexts/PathTracerParamsContext";
+import useProtobufTypes from "../../hooks/useProtobufTypes";
 
 export default function ImageResolutionInput({
   updateRendererParameter,
   disabled,
 }: {
-  updateRendererParameter: (key: string, value: string) => void;
+  updateRendererParameter: (key: string, value: any) => void;
   disabled?: boolean;
 }) {
   const pathTracerParams = useContext(PathTracerParamsContext);
@@ -43,6 +44,8 @@ export default function ImageResolutionInput({
     }
   };
 
+  const { RendererEvent } = useProtobufTypes();
+
   return (
     <Flex align="space-around" justify="center" gap="15px">
       <Space direction="vertical" align="center">
@@ -68,10 +71,16 @@ export default function ImageResolutionInput({
         value={`${internalWidth}x${internalHeight}`}
         prevValue={`${pathTracerParams.prevWidth}x${pathTracerParams.prevHeight}`}
         onClick={() => {
-          updateRendererParameter(
-            "IMAGE_RESOLUTION",
-            `${internalWidth}#${internalHeight}`
-          );
+          // @ts-ignore
+          const message = RendererEvent.create({
+            // @ts-ignore
+            type: RendererEvent.Type.IMAGE_RESOLUTION,
+            blockValue: {
+              x: internalWidth,
+              y: internalHeight,
+            },
+          });
+          updateRendererParameter("IMAGE_RESOLUTION", message);
           pathTracerParams.setPrevWidth(internalWidth);
           pathTracerParams.setPrevHeight(internalHeight);
           pathTracerParams.setWidth(internalWidth);
