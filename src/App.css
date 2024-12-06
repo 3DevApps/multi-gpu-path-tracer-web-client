@@ -12,7 +12,7 @@ main {
 
 :root {
   --header-height: 3rem;
-  --aside-width: 350px;
+  --aside-width: 360px;
 }
 
 .main-view-wrapper {

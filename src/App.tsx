@@ -8,9 +8,11 @@ import { WebsocketContextProvider } from "./contexts/WebsocketContext";
 import { JobSettingsContextProvider } from "./contexts/JobSettingsContext";
 import { PathTracerParamsContextProvider } from "./contexts/PathTracerParamsContext";
 import { StatisticsContextProvider } from "./contexts/StatisticsContext";
+import ConnectionSetupModal from "./components/connection-setup/ConnectionSetupModal";
 
 function App() {
-  const { renderStatistics } = useHandleWebSocketMessages();
+  const { renderStatistics, shouldOpenConnectionSetupModal } =
+    useHandleWebSocketMessages();
 
   return (
     <main>
@@ -19,6 +21,7 @@ function App() {
         <PathTracerSettings />
         <RenderStream />
         <RenderStatistics renderStatistics={renderStatistics} />
+        <ConnectionSetupModal isModalOpen={shouldOpenConnectionSetupModal} />
       </div>
     </main>
   );

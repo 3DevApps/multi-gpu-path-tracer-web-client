@@ -16,11 +16,11 @@ const config = {
   DEFAULT_THREAD_BLOCK_SIZE_X: 8,
   DEFAULT_THREAD_BLOCK_SIZE_Y: 8,
   LOAD_BALANCING_ALGORITHMS: [
-    { value: "FST", label: "Fixed size tasks" },
-    { value: "DTFL", label: "Dynamic tasks with fixed layout" },
-    { value: "DT", label: "Dynamic layout tasks" },
+    { value: "FSFL", label: "Tasks with fixed size and fixed layout" },
+    { value: "DSFL", label: "Tasks with dynamic size and fixed layout" },
+    { value: "DSDL", label: "Tasks with dynamic size and dynamic layout" },
   ],
-  DEFAULT_LOAD_BALANCING_ALGORITHM: "FST",
+  DEFAULT_LOAD_BALANCING_ALGORITHM: "FSFL",
   SERVER_URL: import.meta.env.VITE_DEV_MODE
     ? "localhost:8080"
     : "pathtracing-relay-server.klatka.it",

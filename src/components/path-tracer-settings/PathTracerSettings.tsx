@@ -114,7 +114,7 @@ export default function PathTracerSettings() {
 
   const toggleAside = useCallback(() => {
     setAsideStyle((prev) => ({
-      left: prev.left === 0 ? -350 : 0,
+      left: prev.left === 0 ? -360 : 0,
     }));
   }, []);
 
@@ -266,6 +266,8 @@ export default function PathTracerSettings() {
         pathTracerParams.importStateFromJSON(content);
       } catch (err) {
         console.error("Failed to parse settings file:", err);
+      } finally {
+        input.remove();
       }
     };
 
@@ -309,20 +311,42 @@ export default function PathTracerSettings() {
                 disabled={!isAdmin}
               />
             </Form.Item>
-            <Form.Item>
-              <Checkbox
-                onChange={setShowTaskGrid}
-                checked={pathTracerParams.showTaskGrid}
-                disabled={!isAdmin}
+            <Flex align="center" justify="space-around">
+              <Form.Item
+                label="K parameter"
+                tooltip="K parameter for load balancing"
               >
-                Show task grid
-              </Checkbox>
-              <Tooltip title="Show the grid of tasks in the scene">
-                <QuestionCircleOutlined style={{ color: "#858585" }} />
-              </Tooltip>
-            </Form.Item>
+                <NumberInput
+                  inputValue={pathTracerParams.kParam}
+                  setInputValue={pathTracerParams.setKParam}
+                  updateRendererParameter={updateRendererParameter}
+                  parameterKey="K_PARAMETER"
+                  disabled={
+                    !isAdmin ||
+                    pathTracerParams.loadBalancingAlgorithm === "FSFL"
+                  }
+                />
+              </Form.Item>
+              <Form.Item
+                style={{
+                  // TODO: fix styles (this is a hotfix)
+                  marginTop: 30,
+                }}
+              >
+                <Checkbox
+                  onChange={setShowTaskGrid}
+                  checked={pathTracerParams.showTaskGrid}
+                  disabled={!isAdmin}
+                >
+                  Show task grid
+                </Checkbox>
+                <Tooltip title="Show the grid of tasks in the scene">
+                  <QuestionCircleOutlined style={{ color: "#858585" }} />
+                </Tooltip>
+              </Form.Item>
+            </Flex>
             <Divider />
-            <Flex align="space-between" justify="space-between">
+            <Flex align="space-around" justify="space-around" wrap>
               <Form.Item
                 label="GPU number"
                 tooltip="Number of GPUs used for rendering."
@@ -335,7 +359,7 @@ export default function PathTracerSettings() {
                   disabled={!isAdmin}
                 />
               </Form.Item>
-              <Form.Item
+              {/* <Form.Item
                 label="Streams per GPU"
                 tooltip="Streams allow for asynchronous execution of operations on the GPU, enabling overlapping computation and communication to improve performance."
               >
@@ -346,9 +370,7 @@ export default function PathTracerSettings() {
                   parameterKey="STREAMS_PER_GPU"
                   disabled={!isAdmin}
                 />
-              </Form.Item>
-            </Flex>
-            <Flex align="space-between" justify="space-between">
+              </Form.Item> */}
               <Form.Item
                 label="Samples per pixel"
                 tooltip="The number of light paths or rays traced per pixel during the rendering process."
@@ -374,7 +396,7 @@ export default function PathTracerSettings() {
                 />
               </Form.Item>
             </Flex>
-            <Form.Item
+            {/* <Form.Item
               label="Thread block size"
               tooltip="The size of single Thread Block in the Grid."
             >
@@ -391,8 +413,12 @@ export default function PathTracerSettings() {
                 updateRendererParameter={updateRendererParameter}
                 disabled={!isAdmin}
               />
-            </Form.Item>
-            <Divider />
+            </Form.Item> */}
+            <Divider
+              style={{
+                marginTop: "10px",
+              }}
+            />
             <Form.Item label="Image resolution (width x height)">
               <ImageResolutionInput
                 updateRendererParameter={updateRendererParameter}

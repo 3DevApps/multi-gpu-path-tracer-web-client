@@ -10,6 +10,8 @@ export function useHandleWebSocketMessages() {
   const [renderStatistics, setRenderStatistics] = useState<RenderStatistics>(
     []
   );
+  const [shouldOpenConnectionSetupModal, setShouldOpenConnectionSetupModal] =
+    useState(false);
 
   const notifyUser = useCallback(
     (data: any) => (isDebugJob ? console.log(data) : messageApi.open(data)),
@@ -17,21 +19,33 @@ export function useHandleWebSocketMessages() {
   );
 
   useEffect(() => {
+    console.log("message", message);
     if (!message) {
       return;
     }
     const type = message[0];
     switch (type) {
+      case "GET_CONNECTION_DETAILS":
+        setShouldOpenConnectionSetupModal(true);
+        break;
+      case "CONNECTION_DETAILS_OK":
+        setShouldOpenConnectionSetupModal(false);
+        notifyUser({
+          key: "Connection details",
+          type: "success",
+          content: "Connection details saved successfully",
+        });
+        break;
       case "RENDER_STATS":
         setRenderStatistics(message.splice(1));
         break;
-      case "JOB_ID":
+      case "CONFIG":
+        // jobId
         const url = new URL(window.location.href);
         url.searchParams.set("jobId", message[1]);
         window.history.pushState(null, "", url.toString());
-        break;
-      case "IS_ADMIN":
-        setIsAdmin(message[1] === "true");
+        // isAdmin
+        setIsAdmin(message[2] === "true");
         break;
       case "NOTIFICATION":
         switch (message[1]) {
@@ -50,6 +64,13 @@ export function useHandleWebSocketMessages() {
               content: message[3],
             });
             break;
+          case "ERROR":
+            notifyUser({
+              key: message[2],
+              type: "error",
+              content: message[3],
+            });
+            break;
           default:
             break;
         }
@@ -59,5 +80,9 @@ export function useHandleWebSocketMessages() {
     }
   }, [message, sendMessage, setIsAdmin, notifyUser]);
 
-  return { renderStatistics };
+  return {
+    renderStatistics,
+    shouldOpenConnectionSetupModal,
+    setShouldOpenConnectionSetupModal,
+  };
 }
