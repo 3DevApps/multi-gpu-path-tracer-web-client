@@ -314,7 +314,7 @@ export default function PathTracerSettings() {
             <Flex align="center" justify="space-around">
               <Form.Item
                 label="K parameter"
-                tooltip="K parameter for load balancing"
+                tooltip="K parameter is representing the maximum number of tasks allowed within a single horizontal strip"
               >
                 <NumberInput
                   inputValue={pathTracerParams.kParam}

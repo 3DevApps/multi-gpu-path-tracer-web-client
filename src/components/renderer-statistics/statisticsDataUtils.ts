@@ -74,6 +74,17 @@ export function getStoredData(key: string) {
   return JSON.parse(localStorage.getItem(key) || "{}");
 }
 
+export function removeStoredData(key: string) {
+  const savedKeys = JSON.parse(
+    localStorage.getItem(SESSION_STORAGE_SAVED_DATA_KEY) || "[]"
+  );
+  localStorage.setItem(
+    SESSION_STORAGE_SAVED_DATA_KEY,
+    JSON.stringify(savedKeys.filter((k: string) => k !== key))
+  );
+  localStorage.removeItem(key);
+}
+
 export function getFilteredData(milliseconds: number, category?: string) {
   const storedData = JSON.parse(
     sessionStorage.getItem(SESSION_STORAGE_KEY) || "{}"

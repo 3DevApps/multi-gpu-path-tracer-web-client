@@ -119,7 +119,7 @@ export default function RenderStatisticsComponent({
 
   const [showNewChartModal, setShowNewChartModal] = useState(false);
   const [chosenCategories, setChosenCategories] = useState<any[]>([
-    ["FPS", "FPS", "Average FPS"],
+    ["FPS", "FPS"],
   ]);
 
   const treeData = useMemo(() => {
