@@ -1,4 +1,4 @@
-import { RedoOutlined, SaveOutlined } from "@ant-design/icons";
+import { DeleteOutlined, RedoOutlined, SaveOutlined } from "@ant-design/icons";
 import { Button, Dropdown, Tooltip } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./Chart.css";
@@ -8,6 +8,7 @@ import {
   storeFilteredDataToSessionStorage,
 } from "./statisticsDataUtils";
 import { getFormattedDateTime } from "../../utils/getFormattedDate";
+import NamePrompt from "./NamePrompt";
 
 // @ts-ignore
 const autocolors = window["chartjs-plugin-autocolors"];
@@ -26,9 +27,16 @@ function RecordCircle({ color }: any) {
   );
 }
 
-export default function ChartComponent({ data, ylabel }: any) {
+export default function ChartComponent({
+  data,
+  categoriesToDisplay,
+  ylabel,
+  setChosenCategories,
+  index,
+}: any) {
   const ref = useRef(null);
   const chartRef = useRef(null);
+  const [nameInputModalOpen, setNameInputModalOpen] = useState(false);
 
   useEffect(() => {
     if (!ref.current) {
@@ -40,12 +48,16 @@ export default function ChartComponent({ data, ylabel }: any) {
       return;
     }
 
-    const datasets = Object.keys(data).map((key) => {
-      return {
-        label: key,
-        cubicInterpolationMode: "monotone",
-      };
-    });
+    const datasets = Object.keys(data)
+      .filter((e) => {
+        return categoriesToDisplay.includes(e);
+      })
+      .map((key) => {
+        return {
+          label: key,
+          cubicInterpolationMode: "monotone",
+        };
+      });
 
     // @ts-ignore
     chartRef.current = new Chart(ctx, {
@@ -128,6 +140,7 @@ export default function ChartComponent({ data, ylabel }: any) {
 
   const [recordState, setRecordState] = useState(false);
   const [recordStartTimestamp, setRecordStartTimestamp] = useState(0);
+  const [fileName, setFileName] = useState("");
 
   return (
     <div className="chart-wrapper">
@@ -143,53 +156,42 @@ export default function ChartComponent({ data, ylabel }: any) {
                   key: "1",
                   label: "From 1 minute ago",
                   onClick: () => {
-                    const data = getFilteredData(1 * 60000, ylabel);
-                    const name = `${getFormattedDateTime()}-stats-${ylabel}-1min`;
-                    downloadCSV(data, `${name}.csv`);
-                    storeFilteredDataToSessionStorage(data, name);
+                    setRecordStartTimestamp(Date.now() - 60000);
+                    setNameInputModalOpen(true);
                   },
                 },
                 {
                   key: "2",
                   label: "From 5 minutes ago",
                   onClick: () => {
-                    const data = getFilteredData(5 * 60000, ylabel);
-                    const name = `${getFormattedDateTime()}-stats-${ylabel}-5min`;
-                    downloadCSV(data, `${name}.csv`);
-                    storeFilteredDataToSessionStorage(data, name);
+                    setRecordStartTimestamp(Date.now() - 5 * 60000);
+                    setNameInputModalOpen(true);
                   },
                 },
                 {
                   key: "3",
                   label: "From 10 minutes ago",
                   onClick: () => {
-                    const data = getFilteredData(10 * 60000, ylabel);
-                    const name = `${getFormattedDateTime()}-stats-${ylabel}-10min`;
-                    downloadCSV(data, `${name}.csv`);
-                    storeFilteredDataToSessionStorage(data, name);
+                    setRecordStartTimestamp(Date.now() - 10 * 60000);
+                    setNameInputModalOpen(true);
                   },
                 },
                 {
                   key: "4",
                   label: "From 15 minutes ago",
                   onClick: () => {
-                    const data = getFilteredData(15 * 60000, ylabel);
-                    const name = `${getFormattedDateTime()}-stats-${ylabel}-15min`;
-                    downloadCSV(data, `${name}.csv`);
-                    storeFilteredDataToSessionStorage(data, name);
+                    setRecordStartTimestamp(Date.now() - 15 * 60000);
+                    setNameInputModalOpen(true);
                   },
                 },
                 {
                   key: "5",
                   label: "All time",
                   onClick: () => {
-                    const data = getFilteredData(
-                      Number.MAX_SAFE_INTEGER,
-                      ylabel
+                    setRecordStartTimestamp(
+                      Date.now() - Number.MAX_SAFE_INTEGER
                     );
-                    const name = `${getFormattedDateTime()}-stats-${ylabel}-all`;
-                    downloadCSV(data, `${name}.csv`);
-                    storeFilteredDataToSessionStorage(data, name);
+                    setNameInputModalOpen(true);
                   },
                 },
               ],
@@ -213,10 +215,7 @@ export default function ChartComponent({ data, ylabel }: any) {
             onClick={() => {
               if (recordState) {
                 setRecordState(false);
-                downloadCSV(
-                  getFilteredData(Date.now() - recordStartTimestamp),
-                  "stats_recorded.csv"
-                );
+                setNameInputModalOpen(true);
               } else {
                 setRecordState(true);
                 setRecordStartTimestamp(Date.now());
@@ -224,7 +223,43 @@ export default function ChartComponent({ data, ylabel }: any) {
             }}
           />
         </Tooltip>
+        <Tooltip title="Delete chart" placement="left">
+          <Button
+            size="middle"
+            icon={<DeleteOutlined />}
+            onClick={() => {
+              setChosenCategories((prev: any) => {
+                return prev.filter((_: any, idx: any) => {
+                  return idx !== index;
+                });
+              });
+            }}
+          />
+        </Tooltip>
       </div>
+      <NamePrompt
+        setFileName={setFileName}
+        isModalOpen={nameInputModalOpen}
+        handleOk={() => {
+          setNameInputModalOpen(false);
+          let tmpFileName = fileName;
+          if (tmpFileName === "") {
+            tmpFileName = getFormattedDateTime();
+          }
+
+          console.log(
+            "Record start timestamp",
+            Date.now() - recordStartTimestamp
+          );
+          const myData = getFilteredData(Date.now() - recordStartTimestamp);
+          const dataToSave = {
+            [ylabel]: myData[ylabel],
+          };
+
+          downloadCSV(dataToSave, tmpFileName + ".csv");
+          storeFilteredDataToSessionStorage(dataToSave, tmpFileName);
+        }}
+      />
       <div>
         <canvas ref={ref} width="400" height="300"></canvas>
       </div>

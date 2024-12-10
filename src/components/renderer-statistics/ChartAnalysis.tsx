@@ -30,7 +30,7 @@ export default function ChartAnalysis({ isModalOpen, setIsModalOpen }: any) {
         }),
       };
     });
-  }, []);
+  }, [isModalOpen]);
 
   const [selectedKeys, setSelectedKeys] = useState<any>([]);
   const [chartData, setChartData] = useState<any>([]);
