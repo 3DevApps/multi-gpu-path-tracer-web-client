@@ -1,5 +1,5 @@
 import { Modal, Input } from "antd";
-import React, { useState } from "react";
+import { useState } from "react";
 
 export default function NamePrompt({
   isModalOpen,
