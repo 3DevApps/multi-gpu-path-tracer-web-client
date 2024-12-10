@@ -12,8 +12,8 @@ export default class H264Decoder {
   onFrame: OnFrameCallback;
 
   constructor(width: number, height: number, onFrame: OnFrameCallback) {
-    // this.codecString = "avc1.42001E"; // Baseline profile
-    this.codecString = "avc1.640034"; // High profile
+    this.codecString = "avc1.42001E"; // Baseline profile
+    // this.codecString = "avc1.640034"; // High profile
     this.optimizeForLatency = true;
     this.width = width;
     this.height = height;
