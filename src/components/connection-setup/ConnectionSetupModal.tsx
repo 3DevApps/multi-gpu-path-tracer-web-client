@@ -60,7 +60,8 @@ export default function ConnectionSetupModal({ isModalOpen }: any) {
     >
       <p>
         Before connecting, please make sure that ~/connectionScript.sh is
-        available on the remote environment. You can download the script
+        available on the remote environment. You can download the template
+        script
         <span
           style={{
             color: "#1890ff",
