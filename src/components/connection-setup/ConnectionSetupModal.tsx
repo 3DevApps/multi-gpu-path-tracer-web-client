@@ -58,6 +58,10 @@ export default function ConnectionSetupModal({ isModalOpen }: any) {
         paddingTop: "20px",
       }}
     >
+      <p>
+        Before connecting, please make sure that ~/connectionScript.sh is
+        available on the remote environment!
+      </p>
       <Button
         title="Load from file"
         type="primary"
@@ -199,21 +203,6 @@ export default function ConnectionSetupModal({ isModalOpen }: any) {
             />
           )}
         </Form.Item>
-
-        <Form.Item
-          name="script"
-          label="Remote Script"
-          rules={[{ required: true, message: "Please enter script" }]}
-        >
-          <Input.TextArea
-            rows={14}
-            placeholder="Enter script to execute on remote host"
-            defaultValue={DEFAULT_SCRIPT}
-            value={script}
-            onChange={(e) => setScript(e.target.value)}
-          />
-        </Form.Item>
-
         <Form.Item>
           <Button
             type="default"
