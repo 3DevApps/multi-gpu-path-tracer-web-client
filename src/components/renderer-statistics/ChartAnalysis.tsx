@@ -138,7 +138,7 @@ export default function ChartAnalysis({ isModalOpen, setIsModalOpen }: any) {
       >
         <Flex vertical gap="20px">
           <Button
-            onClick={(e) => {
+            onClick={() => {
               const input = document.createElement("input");
               input.type = "file";
               input.accept = ".csv";
