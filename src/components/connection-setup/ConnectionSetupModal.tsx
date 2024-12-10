@@ -60,7 +60,25 @@ export default function ConnectionSetupModal({ isModalOpen }: any) {
     >
       <p>
         Before connecting, please make sure that ~/connectionScript.sh is
-        available on the remote environment!
+        available on the remote environment. You can download the script
+        <span
+          style={{
+            color: "#1890ff",
+            cursor: "pointer",
+          }}
+          onClick={() => {
+            const blob = new Blob([script], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "connectionScript.sh";
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+        >
+          &nbsp;here.
+        </span>
       </p>
       <Button
         title="Load from file"
