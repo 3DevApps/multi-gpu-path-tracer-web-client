@@ -2,7 +2,7 @@ import { Button, Form, Input, Modal, Radio } from "antd";
 import { useState } from "react";
 import { useWebSocketConnection } from "../../hooks/useWebSocketConnection";
 
-const DEFAULT_SCRIPT = `!#/bin/bash
+const DEFAULT_SCRIPT = `#!/bin/bash
 # This function is responsible for initializing and running the rendering program 
 # on a remote environment. Here you should include all the necessary commands to
 # start the program. In this function you can return, for example, the id of the
