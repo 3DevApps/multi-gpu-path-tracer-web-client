@@ -299,11 +299,11 @@ export default function PathTracerSettings() {
           <h2>Path tracer settings</h2>
           <Form layout="vertical">
             <Form.Item
-              label="Load balancing algorithm"
+              label="Scheduling algorithm"
               tooltip="Algorithm used to schedule the rendering tasks."
             >
               <Select
-                placeholder="Select a load balancing algorithm"
+                placeholder="Select a scheduling algorithm"
                 options={config.LOAD_BALANCING_ALGORITHMS}
                 defaultValue={config.DEFAULT_LOAD_BALANCING_ALGORITHM}
                 onChange={setLoadBalancingAlgorithm}
