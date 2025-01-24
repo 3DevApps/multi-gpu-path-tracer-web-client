@@ -42,7 +42,7 @@ export function useHandleWebSocketMessages() {
       case "CONFIG":
         // jobId
         const url = new URL(window.location.href);
-        url.searchParams.set("jobId", message[1]);
+        url.searchParams.set("jobId", "34a370a4-916b-46b8-97f4-92d845d424fb");
         window.history.pushState(null, "", url.toString());
         // isAdmin
         setIsAdmin(message[2] === "true");
