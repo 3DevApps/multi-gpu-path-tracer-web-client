@@ -50,6 +50,7 @@ message RendererEvent {
         IMAGE_RESOLUTION = 7;
         SHOW_TASK_GRID = 8;
         LOAD_BALANCING_ALGORITHM = 9;
+        K_PARAMETER = 10;
     }
 
     enum LoadBalancingAlgorithm {
