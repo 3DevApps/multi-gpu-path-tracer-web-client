@@ -323,7 +323,7 @@ export default function PathTracerSettings() {
                   parameterKey="K_PARAMETER"
                   disabled={
                     !isAdmin ||
-                    pathTracerParams.loadBalancingAlgorithm === "FSFL"
+                    pathTracerParams.loadBalancingAlgorithm !== "DSFL"
                   }
                 />
               </Form.Item>

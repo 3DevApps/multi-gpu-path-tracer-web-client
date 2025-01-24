@@ -107,7 +107,7 @@ export const PathTracerParamsContextProvider = ({ children }: any) => {
   const [pitch, setPitch] = useState(0);
   const [yaw, setYaw] = useState(0);
   const [moveSpeed, setMoveSpeed] = useState(5);
-  const [kParam, setKParam] = useState(1);
+  const [kParam, setKParam] = useState(2);
 
   const exportStateToJSON = () => {
     return JSON.stringify({
